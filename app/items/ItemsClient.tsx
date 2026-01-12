@@ -17,25 +17,22 @@ export default function ItemsClient() {
   const activeFilter = (searchParams.get("filter") as "lost" | "found" | null) || "all";
 
   useEffect(() => {
-    fetch("/api/items")
+    fetch(`/api/items?filter=${activeFilter}`)
       .then(async (res) => {
         if (!res.ok) {
-          const message = await res.text();
-          throw new Error(message || "Failed to load items.");
+          throw new Error("Failed to load items.");
         }
         return res.json();
       })
-      .then((data: Item[] | { items: Item[] }) => {
-        const parsed = Array.isArray(data) ? data : data.items ?? [];
-        setItems(parsed);
+      .then((data: Item[]) => {
+        setItems(data);
       })
-      .catch((err: Error) => {
-        const message = err.message || "Failed to load items.";
-        setError(message);
-        toast.error(message);
+      .catch(() => {
+        setError("Failed to load items.");
+        toast.error("Failed to load items.");
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [activeFilter]);
 
   const filteredItems = useMemo(() => {
     if (activeFilter === "all") return items;

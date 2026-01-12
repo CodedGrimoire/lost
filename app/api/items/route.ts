@@ -3,15 +3,27 @@ import clientPromise from "@/lib/mongodb";
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const filter = searchParams.get("filter");
+
     const client = await clientPromise;
     const db = client.db();
-    const items = await db.collection("items").find().toArray();
+
+    const query =
+      filter === "lost"
+        ? { status: "lost" }
+        : filter === "found"
+          ? { status: "found" }
+          : {};
+
+    const items = await db.collection("items").find(query).toArray();
+
     return NextResponse.json(items);
-  } catch (error) {
-    const message = (error as Error).message || "Failed to load items.";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json([], { status: 500 });
   }
 }
 
@@ -29,7 +41,7 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
-    const message = (error as Error).message || "Failed to create item.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error(error);
+    return NextResponse.json([], { status: 500 });
   }
 }
