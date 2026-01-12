@@ -21,8 +21,8 @@ export async function GET(req: Request) {
     const items = await db.collection("items").find(query).toArray();
 
     return NextResponse.json(items);
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     return NextResponse.json([], { status: 500 });
   }
 }
