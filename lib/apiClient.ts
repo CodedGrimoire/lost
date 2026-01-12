@@ -36,7 +36,7 @@ async function request<T>(
   if (options.authenticated) {
     const token = getAuthTokenFromCookie();
     if (token) {
-      headers.Authorization = `Bearer ${token}`;
+      headers.set?.("Authorization", `Bearer ${token}`);
     }
   }
 

@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CampusLost+Found
+
+CampusLost+Found is a Next.js App Router experience for reporting, browsing, and reclaiming lost items around campus. It uses Firebase Authentication (client SDK only) and MongoDB-backed API routes, wrapped in a theme-aware UI with light/dark modes.
+
+## Tech Stack
+- **Framework:** Next.js 16 (App Router) with React 19
+- **Styling:** Tailwind CSS, custom gradients, `next-themes`
+- **Auth:** Firebase Authentication (email/password + Google via client SDK)
+- **Data:** MongoDB via official driver (used only inside `app/api`)
+- **Utilities:** TypeScript, ESLint, React Hot Toast
+
+## Features
+- Email/password signup and login with Firebase client SDK (no Firebase Admin)
+- Cookie-based session handling in the frontend
+- Items API at `/api/items` backed by MongoDB
+- Landing page with hero, recent lost/found highlights, safety notice, and CTA
+- Items list, item detail page, and protected report form
+- Light/dark theme toggle with layered gradients and accessible contrast
 
 ## Getting Started
-
-First, run the development server:
-
+Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Run the dev server:
+```bash
+pnpm dev
+```
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
+Create `.env.local` with:
+```
+NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+NEXT_PUBLIC_FIREBASE_APP_ID=...
+MONGODB_URI=...
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
+- `app/` — App Router pages, layouts, and API routes (`app/api/items`)
+- `components/` — UI components (Navbar, ItemCard, RecentLostItems, etc.)
+- `lib/` — Client utilities (`firebase`, `apiClient`) and server-only Mongo connector for API routes
+- `types/` — Shared TypeScript types
 
-## Learn More
+## Scripts
+- `pnpm dev` — Start dev server
+- `pnpm build` — Production build
+- `pnpm start` — Run production server
+- `pnpm lint` — Lint source
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Notes
+- Firebase Admin is intentionally not used; all auth is client-side.
+- MongoDB access is confined to `app/api/**` to keep React components free of server-only code.
+- Remote item images are allowed via `next.config.ts`.
