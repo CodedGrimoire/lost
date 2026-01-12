@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { ItemCard, ItemCardSkeleton } from "@/components/ItemCard";
-import { apiClient } from "@/lib/apiClient";
 import { Item } from "@/types/item";
 import { cn } from "@/lib/utils";
 
@@ -18,25 +17,24 @@ export default function ItemsClient() {
   const activeFilter = (searchParams.get("filter") as "lost" | "found" | null) || "all";
 
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const response = await apiClient.get<{ items: Item[] } | Item[]>("/api/items");
-        const parsed = Array.isArray(response)
-          ? response
-          : Array.isArray((response as { items: Item[] }).items)
-            ? (response as { items: Item[] }).items
-            : [];
+    fetch("/api/items")
+      .then(async (res) => {
+        if (!res.ok) {
+          const message = await res.text();
+          throw new Error(message || "Failed to load items.");
+        }
+        return res.json();
+      })
+      .then((data: Item[] | { items: Item[] }) => {
+        const parsed = Array.isArray(data) ? data : data.items ?? [];
         setItems(parsed);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to load items.";
+      })
+      .catch((err: Error) => {
+        const message = err.message || "Failed to load items.";
         setError(message);
         toast.error(message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchItems();
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const filteredItems = useMemo(() => {
