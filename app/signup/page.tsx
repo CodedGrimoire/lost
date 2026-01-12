@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/app/providers/AuthProvider";
-
-type SignupResponse = { token: string };
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { firebaseAuth } from "@/lib/firebase";
+import { FirebaseError } from "firebase/app";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { token, setSession, loading } = useAuth();
+  const { token, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -28,21 +28,20 @@ export default function SignupPage() {
     setError("");
     setSubmitting(true);
     try {
-      const response = await apiClient.post<SignupResponse>("/auth/signup", {
-        email: email.trim(),
+      await createUserWithEmailAndPassword(
+        firebaseAuth,
+        email.trim(),
         password,
-      });
-      if (!response?.token) {
-        throw new Error("No auth token returned.");
-      }
-      await setSession(response.token);
+      );
       toast.success("Account created");
       router.push("/items");
     } catch (err) {
       const message =
-        err instanceof Error
-          ? err.message
-          : "Unable to create an account. Please try again.";
+        err instanceof FirebaseError
+          ? err.message.replace("Firebase:", "").trim()
+          : err instanceof Error
+            ? err.message
+            : "Unable to create an account. Please try again.";
       setError(message);
       toast.error(message);
     } finally {

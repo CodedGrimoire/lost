@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/app/providers/AuthProvider";
-
-type LoginResponse = { token: string };
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { firebaseAuth } from "@/lib/firebase";
+import { FirebaseError } from "firebase/app";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { token, setSession, loginWithGoogle, loading } = useAuth();
+  const { token, loginWithGoogle, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,21 +29,16 @@ export default function LoginPage() {
     setError("");
     setSubmitting(true);
     try {
-      const response = await apiClient.post<LoginResponse>("/auth/login", {
-        email: email.trim(),
-        password,
-      });
-      if (!response?.token) {
-        throw new Error("No auth token returned.");
-      }
-      await setSession(response.token);
+      await signInWithEmailAndPassword(firebaseAuth, email.trim(), password);
       toast.success("Logged in successfully");
       router.push("/items");
     } catch (err) {
       const message =
-        err instanceof Error
-          ? err.message
-          : "Unable to log in. Please try again.";
+        err instanceof FirebaseError
+          ? err.message.replace("Firebase:", "").trim()
+          : err instanceof Error
+            ? err.message
+            : "Unable to log in. Please try again.";
       setError(message);
       toast.error(message);
     } finally {

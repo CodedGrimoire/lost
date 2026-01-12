@@ -1,23 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary-blue: #2563eb;
+  --color-primary-blue: #2764ff;
+  --color-primary-blue-2: #4ca3ff;
+  --color-primary-sky: #8ad9ff;
   --color-primary-white: #f7f9fc;
-  --color-primary-dark: #0b1220;
+  --color-primary-dark: #050915;
   --color-surface: #ffffff;
-  --color-card: #f0f4ff;
-  --color-text: #0f172a;
+  --color-card: #f4f7ff;
+  --color-text: #0b1220;
   --color-muted: #475569;
-  --color-border: #e2e8f0;
+  --color-border: #e0e7ff;
 }
 
 .dark {
-  --color-surface: #0f172a;
-  --color-card: #111827;
-  --color-text: #e5e7eb;
-  --color-muted: #cbd5e1;
-  --color-border: #1f2937;
-  --color-primary-white: #0f172a;
+  --color-surface: #080d1a;
+  --color-card: #0c142a;
+  --color-text: #e8edf6;
+  --color-muted: #c7d2e6;
+  --color-border: #1e2c4a;
+  --color-primary-white: #0b1220;
 }
 
 * {
@@ -25,10 +27,17 @@
 }
 
 body {
-  background: var(--color-primary-white);
+  background: radial-gradient(circle at 20% 20%, rgba(76, 163, 255, 0.16), transparent 35%),
+    linear-gradient(180deg, rgba(247, 249, 252, 1) 0%, rgba(238, 244, 255, 0.8) 45%, #f7f9fc 100%);
   color: var(--color-text);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background 0.3s ease, color 0.2s ease;
+}
+
+.dark body {
+  background: radial-gradient(circle at 80% 10%, rgba(76, 163, 255, 0.18), transparent 35%),
+    radial-gradient(circle at 10% 90%, rgba(39, 100, 255, 0.12), transparent 40%),
+    linear-gradient(180deg, #050915 0%, #0b1220 60%, #0a1021 100%);
 }
 
 .bg-surface {
@@ -37,6 +46,7 @@ body {
 
 .bg-card {
   background-color: var(--color-card);
+  background-image: linear-gradient(145deg, rgba(76, 163, 255, 0.04), transparent);
 }
 
 .bg-primary {
@@ -76,20 +86,29 @@ body {
 }
 
 .btn-primary {
-  background: var(--color-primary-blue);
+  background: linear-gradient(135deg, var(--color-primary-blue), var(--color-primary-blue-2));
   color: #fff;
-  box-shadow: 0 10px 30px -12px rgba(37, 99, 235, 0.6);
+  box-shadow: 0 12px 32px -14px rgba(39, 100, 255, 0.75);
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 14px 40px -12px rgba(37, 99, 235, 0.7);
+  box-shadow: 0 16px 44px -14px rgba(39, 100, 255, 0.9);
 }
 
 .btn-secondary {
   background: transparent;
   border: 1px solid var(--color-border);
   color: var(--color-text);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.btn-secondary:hover {
+  background: rgba(39, 100, 255, 0.06);
+  border-color: rgba(39, 100, 255, 0.3);
+}
+.dark .btn-secondary:hover {
+  background: rgba(76, 163, 255, 0.12);
+  border-color: rgba(76, 163, 255, 0.35);
 }
 
 .card {
@@ -98,11 +117,39 @@ body {
   border-radius: 16px;
   padding: 1.5rem;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease;
+  box-shadow: 0 10px 35px -28px rgba(10, 20, 60, 0.45);
 }
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px -18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 14px 40px -20px rgba(10, 20, 60, 0.55);
+}
+
+.dark .card {
+  border-color: rgba(76, 163, 255, 0.2);
+  box-shadow: 0 12px 36px -22px rgba(10, 20, 60, 0.7);
+}
+
+.hero-shell {
+  background: linear-gradient(145deg, rgba(76, 163, 255, 0.08), rgba(39, 100, 255, 0.05), transparent),
+    radial-gradient(circle at 85% 20%, rgba(138, 217, 255, 0.22), transparent 45%),
+    var(--color-card);
+  box-shadow: 0 20px 60px -32px rgba(39, 100, 255, 0.35);
+}
+.dark .hero-shell {
+  background: linear-gradient(145deg, rgba(76, 163, 255, 0.16), rgba(39, 100, 255, 0.12), rgba(5, 9, 21, 0.9));
+  box-shadow: 0 22px 70px -35px rgba(39, 100, 255, 0.4);
+}
+
+.gradient-text {
+  background: linear-gradient(120deg, var(--color-primary-blue), var(--color-primary-blue-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.dark .gradient-text {
+  background: linear-gradient(120deg, #8ad9ff, var(--color-primary-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .badge {

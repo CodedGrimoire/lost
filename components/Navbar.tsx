@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,12 @@ export default function Navbar() {
   const router = useRouter();
   const { user, token, logout } = useAuth();
   const [open, setOpen] = useState(false);
-  const mounted = typeof window !== "undefined";
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -76,7 +81,7 @@ export default function Navbar() {
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
             className="ml-2 rounded-full border border-base p-2 text-lg transition hover:bg-black/5 dark:hover:bg-white/10"
           >
-            {mounted ? (theme === "dark" || resolvedTheme === "dark" ? "🌙" : "☀️") : "☀️"}
+            {mounted ? (theme === "dark" || resolvedTheme === "dark" ? "🌙" : "☀️") : "…"}
           </button>
         </nav>
 
@@ -128,7 +133,11 @@ export default function Navbar() {
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
               className="rounded-xl border border-base px-3 py-2 text-left text-sm font-semibold"
             >
-              {mounted ? (theme === "dark" || resolvedTheme === "dark" ? "🌙 Dark" : "☀️ Light") : "☀️ Light"}
+              {mounted
+                ? theme === "dark" || resolvedTheme === "dark"
+                  ? "🌙 Dark"
+                  : "☀️ Light"
+                : "…"}
             </button>
           </div>
         </div>

@@ -16,10 +16,17 @@ async function request<T>(
   method: HttpMethod,
   options: RequestOptions = {},
 ): Promise<T> {
-  const url =
-    path.startsWith("http") || path.startsWith("/")
-      ? `${baseUrl}${path}`
-      : `${baseUrl}/${path}`;
+  const url = baseUrl
+    ? path.startsWith("http")
+      ? path
+      : path.startsWith("/")
+        ? `${baseUrl}${path}`
+        : `${baseUrl}/${path}`
+    : path.startsWith("http")
+      ? path
+      : path.startsWith("/")
+        ? path
+        : `/${path}`;
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",

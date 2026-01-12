@@ -3,33 +3,31 @@
 import {
   createContext,
   ReactNode,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from "react";
-import { apiClient } from "@/lib/apiClient";
 import {
   clearAuthTokenCookie,
-  getAuthTokenFromCookie,
   setAuthTokenCookie,
 } from "@/lib/utils";
-
-type AuthUser = {
-  uid?: string;
-  email?: string;
-  name?: string;
-  picture?: string;
-};
+import {
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  type User,
+} from "firebase/auth";
+import { firebaseAuth } from "@/lib/firebase";
 
 type AuthContextValue = {
-  user: AuthUser | null;
+  user: User | null;
   token: string;
   loading: boolean;
   setSession: (token: string) => Promise<void>;
   refreshUser: () => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loginWithGoogle: () => Promise<void>;
 };
 
@@ -37,38 +35,25 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState("");
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUser = useCallback(
-    async (nextToken: string) => {
-      try {
-        const profile = await apiClient.get<AuthUser>("/api/user/me", {
-          authenticated: true,
-          headers: { Authorization: `Bearer ${nextToken}` },
-        });
-        setUser(profile);
-      } catch (error) {
-        console.error("Failed to load user profile", error);
-        clearAuthTokenCookie();
-        setToken("");
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [],
-  );
-
   useEffect(() => {
-    const existing = getAuthTokenFromCookie();
-    if (existing) {
-      setToken(existing);
-      fetchUser(existing);
-    } else {
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (nextUser) => {
+      if (nextUser) {
+        setUser(nextUser);
+        const idToken = await nextUser.getIdToken();
+        setToken(idToken);
+        setAuthTokenCookie(idToken);
+      } else {
+        setUser(null);
+        setToken("");
+        clearAuthTokenCookie();
+      }
       setLoading(false);
-    }
-  }, [fetchUser]);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -78,22 +63,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession: async (nextToken: string) => {
         setAuthTokenCookie(nextToken);
         setToken(nextToken);
-        await fetchUser(nextToken);
+        setLoading(false);
       },
       refreshUser: async () => {
-        if (!token) return;
-        await fetchUser(token);
+        const current = firebaseAuth.currentUser;
+        if (!current) return;
+        const idToken = await current.getIdToken(true);
+        setAuthTokenCookie(idToken);
+        setToken(idToken);
+        setUser(current);
       },
-      logout: () => {
+      logout: async () => {
+        await signOut(firebaseAuth);
         clearAuthTokenCookie();
         setToken("");
         setUser(null);
       },
       loginWithGoogle: async () => {
-        throw new Error("Google login is not configured yet.");
+        const provider = new GoogleAuthProvider();
+        const credentials = await signInWithPopup(firebaseAuth, provider);
+        const idToken = await credentials.user.getIdToken();
+        setAuthTokenCookie(idToken);
+        setToken(idToken);
+        setUser(credentials.user);
       },
     }),
-    [fetchUser, loading, token, user],
+    [loading, token, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

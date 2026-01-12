@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { ItemCard, ItemCardSkeleton } from "@/components/ItemCard";
 import { apiClient } from "@/lib/apiClient";
 import { Item } from "@/types/item";
+import { RecentLostItems } from "@/components/RecentLostItems";
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
@@ -35,20 +36,19 @@ export default function Home() {
     fetchItems();
   }, []);
 
-  const { lostItems, foundItems } = useMemo(() => {
-    const lost = items.filter((item) => item.status === "lost").slice(0, 3);
-    const found = items.filter((item) => item.status === "found").slice(0, 3);
-    return { lostItems: lost, foundItems: found };
-  }, [items]);
+  const foundItems = useMemo(
+    () => items.filter((item) => item.status === "found").slice(0, 3),
+    [items],
+  );
 
   return (
     <div className="space-y-14">
-      <section className="grid items-center gap-10 rounded-3xl bg-card px-6 py-10 shadow-sm md:grid-cols-2 md:px-10 md:py-14">
+      <section className="grid items-center gap-10 rounded-3xl bg-card px-6 py-10 shadow-sm md:grid-cols-2 md:px-10 md:py-14 hero-shell">
         <div className="space-y-6">
           <p className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-sm font-semibold text-primary shadow-sm">
             🎒 Campus Safety First
           </p>
-          <h1 className="text-4xl font-bold leading-tight md:text-5xl">
+          <h1 className="text-4xl font-bold leading-tight md:text-5xl gradient-text">
             Find lost belongings fast with CampusLost+Found
           </h1>
           <p className="text-lg text-muted">
@@ -113,23 +113,7 @@ export default function Home() {
             View all →
           </Link>
         </div>
-        {loading ? (
-          <div className="grid gap-4 md:grid-cols-3">
-            <ItemCardSkeleton />
-            <ItemCardSkeleton />
-            <ItemCardSkeleton />
-          </div>
-        ) : error ? (
-          <p className="text-sm text-red-600">{error}</p>
-        ) : lostItems.length ? (
-          <div className="grid gap-4 md:grid-cols-3">
-            {lostItems.map((item) => (
-              <ItemCard key={item._id} item={item} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted">No lost items reported yet.</p>
-        )}
+        <RecentLostItems />
       </section>
 
       <section className="section-shell">
