@@ -28,15 +28,15 @@ async function request<T>(
         ? path
         : `/${path}`;
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(options.headers || {}),
+    ...(options.headers as Record<string, string> | undefined),
   };
 
   if (options.authenticated) {
     const token = getAuthTokenFromCookie();
     if (token) {
-      headers.set?.("Authorization", `Bearer ${token}`);
+      headers["Authorization"] = `Bearer ${token}`;
     }
   }
 
