@@ -77,20 +77,28 @@ export default function ItemsClient() {
 
       {loading ? (
         <div className="grid gap-4 md:grid-cols-3">
-          <ItemCardSkeleton />
-          <ItemCardSkeleton />
-          <ItemCardSkeleton />
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="animate-fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
+              <ItemCardSkeleton />
+            </div>
+          ))}
         </div>
       ) : error ? (
-        <p className="text-sm text-red-600">{error}</p>
+        <div className="animate-fade-in rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+          {error}
+        </div>
       ) : filteredItems.length ? (
         <div className="grid gap-4 md:grid-cols-3">
-          {filteredItems.map((item) => (
-            <ItemCard key={item._id} item={item} />
+          {filteredItems.map((item, i) => (
+            <div key={item._id} className="animate-fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
+              <ItemCard item={item} />
+            </div>
           ))}
         </div>
       ) : (
-        <p className="text-muted">No items match this filter yet.</p>
+        <div className="animate-fade-in rounded-lg border border-base bg-card p-8 text-center">
+          <p className="text-muted">No items match this filter yet.</p>
+        </div>
       )}
     </div>
   );

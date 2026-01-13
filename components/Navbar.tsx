@@ -31,13 +31,11 @@ export default function Navbar() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/items", label: "Items" },
-    token
-      ? { href: "/add-item", label: "Report Item" }
-      : { href: "/login", label: "Login" },
+    ...(token ? [{ href: "/add-item", label: "Report Item" }] : []),
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-base bg-surface/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-base bg-surface backdrop-blur-lg shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:py-4">
         <Link href="/" className="flex items-center gap-3 font-semibold">
           <div className="relative h-10 w-10 overflow-hidden rounded-full border border-base bg-white">
@@ -63,10 +61,27 @@ export default function Navbar() {
           ))}
           {token ? (
             <>
-              {user?.email ? (
-                <span className="px-2 text-sm font-semibold text-primary">
-                  {user.email}
-                </span>
+              {user ? (
+                <div className="flex items-center gap-2 rounded-full border border-base bg-card px-3 py-1.5">
+                  <div className="relative h-8 w-8 overflow-hidden rounded-full border border-base bg-primary/10">
+                    {user.photoURL ? (
+                      <Image
+                        src={user.photoURL}
+                        alt={user.displayName || user.email || "User"}
+                        fill
+                        sizes="32px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-primary-blue-2 text-xs font-bold text-white">
+                        {(user.displayName || user.email || "U")[0].toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold text-primary">
+                    {user.displayName || user.email?.split("@")[0] || "User"}
+                  </span>
+                </div>
               ) : null}
               <button
                 onClick={handleLogout}
@@ -75,7 +90,32 @@ export default function Navbar() {
                 Logout
               </button>
             </>
-          ) : null}
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className={cn(
+                  "rounded-full px-4 py-2 text-sm font-medium transition",
+                  pathname === "/login"
+                    ? "bg-primary text-white shadow-sm"
+                    : "text-muted hover:bg-black/5 dark:hover:bg-white/5",
+                )}
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className={cn(
+                  "rounded-full px-4 py-2 text-sm font-medium transition",
+                  pathname === "/signup"
+                    ? "bg-primary text-white shadow-sm"
+                    : "text-muted hover:bg-black/5 dark:hover:bg-white/5",
+                )}
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
           <button
             aria-label="Toggle theme"
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
@@ -115,10 +155,32 @@ export default function Navbar() {
             ))}
             {token ? (
               <>
-                {user?.email ? (
-                  <p className="rounded-xl border border-base px-3 py-2 text-sm font-semibold text-primary">
-                    {user.email}
-                  </p>
+                {user ? (
+                  <div className="flex items-center gap-3 rounded-xl border border-base bg-card px-3 py-2">
+                    <div className="relative h-10 w-10 overflow-hidden rounded-full border border-base bg-primary/10">
+                      {user.photoURL ? (
+                        <Image
+                          src={user.photoURL}
+                          alt={user.displayName || user.email || "User"}
+                          fill
+                          sizes="40px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-primary-blue-2 text-sm font-bold text-white">
+                          {(user.displayName || user.email || "U")[0].toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-primary">
+                        {user.displayName || user.email?.split("@")[0] || "User"}
+                      </p>
+                      {user.email && user.displayName && (
+                        <p className="text-xs text-muted">{user.email}</p>
+                      )}
+                    </div>
+                  </div>
                 ) : null}
                 <button
                   onClick={handleLogout}
@@ -127,7 +189,34 @@ export default function Navbar() {
                   Logout
                 </button>
               </>
-            ) : null}
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "rounded-xl px-3 py-2 text-sm font-semibold transition",
+                    pathname === "/login"
+                      ? "bg-primary text-white"
+                      : "text-muted hover:bg-black/5 dark:hover:bg-white/5",
+                  )}
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "rounded-xl px-3 py-2 text-sm font-semibold transition",
+                    pathname === "/signup"
+                      ? "bg-primary text-white"
+                      : "text-muted hover:bg-black/5 dark:hover:bg-white/5",
+                  )}
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
             <button
               aria-label="Toggle theme"
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}

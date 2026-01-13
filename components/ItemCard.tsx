@@ -4,12 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { Item } from "@/types/item";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "./Skeleton";
 
 export function ItemCard({ item }: { item: Item }) {
   return (
     <Link
       href={`/items/${item._id}`}
-      className="card flex flex-col gap-3 bg-surface"
+      className="card flex flex-col gap-3 bg-surface transition-smooth hover:scale-[1.02]"
       prefetch={false}
     >
       <div className="relative h-40 w-full overflow-hidden rounded-xl border border-base bg-primary-white">
@@ -59,13 +60,16 @@ export function ItemCard({ item }: { item: Item }) {
 
 export function ItemCardSkeleton() {
   return (
-    <div className="card flex animate-pulse flex-col gap-3">
-      <div className="h-40 w-full rounded-xl bg-black/5 dark:bg-white/10" />
-      <div className="h-4 w-2/3 rounded bg-black/5 dark:bg-white/10" />
-      <div className="h-3 w-full rounded bg-black/5 dark:bg-white/10" />
+    <div className="card flex flex-col gap-3 animate-fade-in">
+      <Skeleton variant="rectangular" height={160} className="w-full rounded-xl" />
+      <div className="flex items-start justify-between gap-2">
+        <Skeleton variant="text" width="70%" height={24} />
+        <Skeleton variant="rectangular" width={60} height={24} className="rounded-full" />
+      </div>
+      <Skeleton variant="text" lines={2} />
       <div className="flex gap-3">
-        <div className="h-3 w-24 rounded bg-black/5 dark:bg-white/10" />
-        <div className="h-3 w-16 rounded bg-black/5 dark:bg-white/10" />
+        <Skeleton variant="rectangular" width={100} height={16} />
+        <Skeleton variant="rectangular" width={80} height={16} />
       </div>
     </div>
   );

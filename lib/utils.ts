@@ -18,6 +18,17 @@ export function setAuthTokenCookie(token: string) {
   }`;
 }
 
+// Server-side cookie setter for NextResponse
+export function setAuthTokenCookieInResponse(
+  response: Response,
+  token: string
+) {
+  const cookieValue = `auth_token=${encodeURIComponent(token)}; path=/; max-age=${
+    60 * 60 * 24 * 7
+  }; SameSite=Lax; HttpOnly`;
+  response.headers.append("Set-Cookie", cookieValue);
+}
+
 export function clearAuthTokenCookie() {
   if (typeof document === "undefined") return;
   document.cookie = "auth_token=; path=/; max-age=0";

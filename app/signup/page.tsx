@@ -8,6 +8,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { firebaseAuth } from "@/lib/firebase";
 import { FirebaseError } from "firebase/app";
+import { Loader } from "@/components/Loader";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -50,7 +51,14 @@ export default function SignupPage() {
   };
 
   if (loading) {
-    return <p className="text-sm text-muted">Checking session...</p>;
+    return (
+      <div className="mx-auto max-w-md space-y-6 rounded-2xl border border-base bg-card p-8 shadow-sm">
+        <div className="flex flex-col items-center justify-center gap-4 py-8">
+          <Loader size="lg" variant="spinner" />
+          <p className="text-sm text-muted">Checking session...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

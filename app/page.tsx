@@ -8,6 +8,7 @@ import { ItemCard, ItemCardSkeleton } from "@/components/ItemCard";
 import { apiClient } from "@/lib/apiClient";
 import { Item } from "@/types/item";
 import { RecentLostItems } from "@/components/RecentLostItems";
+import { CampusMap } from "@/components/CampusMap";
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
@@ -161,6 +162,74 @@ export default function Home() {
               <p className="text-sm text-muted">{item.description}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="section-shell">
+        <div>
+          <h2 className="section-title">About CampusLost+Found</h2>
+          <p className="section-subtitle">
+            Connecting the campus community to reunite lost items with their owners.
+          </p>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="card space-y-4">
+            <h3 className="text-xl font-semibold">Our Mission</h3>
+            <p className="text-muted">
+              CampusLost+Found is dedicated to creating a safe, efficient, and community-driven platform 
+              for students and staff to report and recover lost items on campus. We believe in the power 
+              of community to help one another and make campus life easier.
+            </p>
+          </div>
+          <div className="card space-y-4">
+            <h3 className="text-xl font-semibold">How We Help</h3>
+            <p className="text-muted">
+              Our platform streamlines the lost and found process by providing a centralized location 
+              where items can be reported, searched, and claimed. With detailed descriptions, location 
+              information, and images, finding lost belongings has never been easier.
+            </p>
+          </div>
+        </div>
+        <div className="card space-y-4">
+          <h3 className="text-xl font-semibold">Key Features</h3>
+          <div className="grid gap-4 md:grid-cols-3">
+            {[
+              { icon: "🔍", title: "Easy Search", desc: "Quickly search through all reported items with filters and keywords." },
+              { icon: "📸", title: "Photo Support", desc: "Upload images to help identify lost items more accurately." },
+              { icon: "📍", title: "Location Tracking", desc: "Pinpoint exact locations where items were found or lost." },
+              { icon: "🔔", title: "Instant Updates", desc: "Get notified when items matching your search are posted." },
+              { icon: "✅", title: "Verified Users", desc: "Secure authentication ensures only campus members can participate." },
+              { icon: "🤝", title: "Community Driven", desc: "Built by students, for students, fostering a helpful campus culture." },
+            ].map((feature) => (
+              <div key={feature.title} className="space-y-2">
+                <div className="text-2xl">{feature.icon}</div>
+                <h4 className="font-semibold">{feature.title}</h4>
+                <p className="text-sm text-muted">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-shell">
+        <div>
+          <h2 className="section-title">Campus Location</h2>
+          <p className="section-subtitle">
+            Find us at Dhaka University. Check the map below for our campus area.
+          </p>
+        </div>
+        <CampusMap />
+        <div className="mt-4 rounded-xl border border-base bg-card p-4">
+          <div className="flex flex-wrap gap-6 text-sm">
+            <div>
+              <p className="font-semibold text-primary">📍 Address</p>
+              <p className="text-muted">Dhaka University Area, Dhaka, Bangladesh</p>
+            </div>
+            <div>
+              <p className="font-semibold text-primary">🌐 Coordinates</p>
+              <p className="text-muted">23.7336° N, 90.3927° E</p>
+            </div>
+          </div>
         </div>
       </section>
 
