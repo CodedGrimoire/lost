@@ -1,58 +1,262 @@
 # CampusLost+Found
 
-CampusLost+Found is a Next.js App Router experience for reporting, browsing, and reclaiming lost items around campus. It uses Firebase Authentication (client SDK only) and MongoDB-backed API routes, wrapped in a theme-aware UI with light/dark modes.
+**CampusLost+Found** is a modern, full-stack web application designed to help students and campus community members report, browse, and reclaim lost items around campus. Built with Next.js 16 (App Router) and featuring a beautiful glassmorphism UI with light/dark theme support, interactive maps, and secure Firebase authentication.
 
-## Tech Stack
+## 🚀 Tech Stack
+
 - **Framework:** Next.js 16 (App Router) with React 19
-- **Styling:** Tailwind CSS, custom gradients, `next-themes`
-- **Auth:** Firebase Authentication (email/password + Google via client SDK)
-- **Data:** MongoDB via official driver (used only inside `app/api`)
+- **Styling:** Tailwind CSS 4, custom gradients, glassmorphism effects, `next-themes`
+- **Authentication:** Firebase Authentication (email/password + Google via client SDK)
+- **Database:** MongoDB via official driver (used only inside `app/api`)
+- **Maps:** React Leaflet with OpenStreetMap tiles
 - **Utilities:** TypeScript, ESLint, React Hot Toast
+- **Package Manager:** pnpm
 
-## Features
-- Email/password signup and login with Firebase client SDK (no Firebase Admin)
-- Cookie-based session handling in the frontend
-- Items API at `/api/items` backed by MongoDB
-- Landing page with hero, recent lost/found highlights, safety notice, and CTA
-- Items list, item detail page, and protected report form
-- Light/dark theme toggle with layered gradients and accessible contrast
+---
 
-## Getting Started
-Install dependencies:
+## 📦 Setup & Installation
+
+### Prerequisites
+
+- Node.js 18+ and pnpm installed
+- MongoDB database (local or cloud)
+- Firebase project with Authentication enabled
+
+### Installation Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd lost
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
+
+3. **Set up environment variables**
+   
+   Create a `.env.local` file in the root directory:
+   ```env
+   # API Configuration
+   NEXT_PUBLIC_API_URL=http://localhost:3000
+   
+   # Firebase Configuration (Client SDK)
+   NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
+   
+   # MongoDB Connection
+   MONGODB_URI=your_mongodb_connection_string
+   
+   # Demo Login (Optional)
+   DEMO_USER=demo@example.com
+   DEMO_PASSWORD=demo_password
+   ```
+
+4. **Run the development server**
+   ```bash
+   pnpm dev
+   ```
+
+5. **Open your browser**
+   
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Production Build
+
 ```bash
-pnpm install
+# Build for production
+pnpm build
+
+# Start production server
+pnpm start
 ```
 
-Run the dev server:
-```bash
-pnpm dev
+---
+
+## 🛣️ Route Summary
+
+### Frontend Routes (Pages)
+
+| Route | Description | Auth Required |
+|-------|-------------|---------------|
+| `/` | Landing page with hero, features, about, and campus map | No |
+| `/login` | User login page (Firebase Auth + Demo login) | No |
+| `/signup` | User registration page | No |
+| `/items` | Browse all lost and found items with filters | No |
+| `/items/[id]` | View detailed item information with location map | No |
+| `/add-item` | Report a new lost or found item | Yes |
+
+### API Routes
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| `GET` | `/api/items` | Fetch all items (supports `?filter=lost` or `?filter=found`) | No |
+| `POST` | `/api/items` | Create a new item report | Yes |
+| `GET` | `/api/items/[id]` | Fetch a single item by ID | No |
+| `POST` | `/api/auth/demo` | Demo login endpoint | No |
+
+---
+
+## ✨ Implemented Features
+
+### 1. **Authentication System**
+- **Email/Password Authentication** via Firebase client SDK
+- **Google Sign-In** integration
+- **Demo Login** for quick testing (configurable via environment variables)
+- **Cookie-based Session Management** for persistent authentication
+- **Protected Routes** with automatic redirect to login
+- **User Profile Display** in navbar (username and profile picture)
+
+### 2. **Item Management**
+- **Browse Items** - View all lost and found items with filtering options
+- **Item Details** - Comprehensive item view with image, description, location, and status
+- **Report Items** - Protected form to report new lost or found items
+- **Status Indicators** - Visual badges for "Lost" (🔍) and "Found" (✅) items
+- **Image Support** - Display item images from URLs (Firebase Storage compatible)
+
+### 3. **Interactive Maps**
+- **Campus Location Map** - Landing page map showing Dhaka University location
+- **Item Location Map** - Individual item pages show location on interactive map
+- **React Leaflet Integration** - Full map functionality with markers and popups
+- **Coordinate Parsing** - Automatic location parsing from text descriptions
+- **Fallback Handling** - Defaults to campus location if coordinates unavailable
+
+### 4. **Modern UI/UX**
+- **Glassmorphism Design** - Beautiful frosted glass effects throughout the application
+- **Light/Dark Theme** - Seamless theme switching with `next-themes`
+- **Responsive Design** - Mobile-first approach with Tailwind CSS
+- **Loading States** - Skeleton loaders and animated spinners
+- **Toast Notifications** - User feedback via React Hot Toast
+- **Smooth Animations** - Fade-in, slide-in, and gradient animations
+- **Accessibility** - WCAG 2.1 AA compliant color contrast and keyboard navigation
+
+### 5. **Landing Page Sections**
+- **Hero Section** - Eye-catching introduction with gradient text and CTA buttons
+- **How It Works** - Three-step process explanation
+- **Recent Lost Items** - Highlights of recently reported items
+- **About Section** - Mission, features, and platform information
+- **Campus Location** - Interactive map showing university location
+- **Safety Notice** - Important security and safety guidelines
+- **Call-to-Action** - Encouraging user engagement
+
+### 6. **Navigation & Layout**
+- **Smart Navbar** - Dynamic links based on authentication status
+  - Shows "Login" and "Sign Up" when logged out
+  - Shows "Report Item", username, profile picture, and "Logout" when logged in
+- **Footer** - Comprehensive footer with quick links, privacy policy, and social media
+- **Breadcrumbs** - Clear navigation hierarchy
+
+### 7. **Color Palette & Theming**
+- **Cohesive Color Scheme** - Primary blue, yellow accents, and state colors
+- **Gradient Effects** - Beautiful gradients for backgrounds and text
+- **Theme-Aware Components** - All components adapt to light/dark mode
+- **Custom CSS Variables** - Centralized color management in `globals.css`
+
+### 8. **Performance Optimizations**
+- **Dynamic Imports** - Leaflet maps loaded client-side to prevent SSR issues
+- **Image Optimization** - Next.js Image component with remote pattern support
+- **Code Splitting** - Automatic route-based code splitting
+- **Lazy Loading** - Components loaded on demand
+
+---
+
+## 📝 Feature Explanations
+
+### Authentication System
+The application uses Firebase Authentication's client SDK for secure user authentication. Users can sign up and log in using email/password or Google OAuth. A demo login option is available for quick testing without creating real accounts. Session management is handled via HTTP-only cookies, ensuring secure token storage.
+
+### Item Management
+Items are stored in MongoDB and can be filtered by status (lost/found). The item detail page provides comprehensive information including images, descriptions, location data, and an interactive map. Only authenticated users can report new items, while browsing is open to everyone.
+
+### Interactive Maps
+React Leaflet powers the map functionality, showing both the campus location on the landing page and specific item locations on detail pages. The system intelligently parses location strings for coordinates and falls back to the campus location if coordinates aren't available.
+
+### Glassmorphism UI
+The entire application features a modern glassmorphism design with:
+- Semi-transparent backgrounds with backdrop blur
+- Subtle borders and soft shadows
+- Saturation enhancement for vibrant colors
+- Theme-aware glass effects for both light and dark modes
+
+### Responsive Design
+Built mobile-first with Tailwind CSS, the application adapts seamlessly to all screen sizes. Components use CSS Grid and Flexbox for flexible layouts that work on phones, tablets, and desktops.
+
+### Theme System
+The application supports both light and dark themes with automatic system preference detection. Users can manually toggle themes, and all components adapt their colors, backgrounds, and glass effects accordingly.
+
+---
+
+## 📁 Project Structure
+
 ```
-Open http://localhost:3000.
-
-## Environment Variables
-Create `.env.local` with:
+lost/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   │   ├── auth/          # Authentication endpoints
+│   │   └── items/         # Item CRUD endpoints
+│   ├── items/             # Item pages
+│   ├── login/             # Login page
+│   ├── signup/            # Signup page
+│   ├── add-item/          # Report item page
+│   └── page.tsx           # Landing page
+├── components/            # React components
+│   ├── Navbar.tsx         # Navigation bar
+│   ├── Footer.tsx         # Footer component
+│   ├── ItemCard.tsx       # Item card component
+│   ├── CampusMap.tsx      # Campus location map
+│   ├── ItemLocationMap.tsx # Item location map
+│   ├── Loader.tsx         # Loading indicators
+│   └── Skeleton.tsx       # Skeleton loaders
+├── lib/                   # Utility libraries
+│   ├── firebase.ts        # Firebase client config
+│   ├── mongodb.ts         # MongoDB connection
+│   ├── apiClient.ts       # API client utilities
+│   └── utils.ts           # General utilities
+├── types/                 # TypeScript type definitions
+│   └── item.ts            # Item type
+└── public/                # Static assets
 ```
-NEXT_PUBLIC_API_URL=http://localhost:3000
-NEXT_PUBLIC_FIREBASE_API_KEY=...
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
-NEXT_PUBLIC_FIREBASE_APP_ID=...
-MONGODB_URI=...
-```
 
-## Project Structure
-- `app/` — App Router pages, layouts, and API routes (`app/api/items`)
-- `components/` — UI components (Navbar, ItemCard, RecentLostItems, etc.)
-- `lib/` — Client utilities (`firebase`, `apiClient`) and server-only Mongo connector for API routes
-- `types/` — Shared TypeScript types
+---
 
-## Scripts
-- `pnpm dev` — Start dev server
-- `pnpm build` — Production build
-- `pnpm start` — Run production server
-- `pnpm lint` — Lint source
+## 🛠️ Available Scripts
 
-## Notes
-- Firebase Admin is intentionally not used; all auth is client-side.
-- MongoDB access is confined to `app/api/**` to keep React components free of server-only code.
-- Remote item images are allowed via `next.config.ts`.
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Start development server on http://localhost:3000 |
+| `pnpm build` | Create production build |
+| `pnpm start` | Start production server |
+| `pnpm lint` | Run ESLint to check code quality |
+
+---
+
+## 🔒 Security Notes
+
+- Firebase Admin SDK is intentionally not used; all authentication is client-side
+- MongoDB access is confined to `app/api/**` to keep React components free of server-only code
+- Authentication tokens are stored in HTTP-only cookies
+- Environment variables are never exposed to the client (except `NEXT_PUBLIC_*` prefixed ones)
+
+---
+
+## 📄 License
+
+This project is private and proprietary.
+
+---
+
+## 🤝 Contributing
+
+This is a private project. For questions or issues, please contact the development team.
+
+---
+
+## 📧 Contact
+
+For support or inquiries:
+- 📧 Email: support@campuslostfound.edu
+- 📍 Location: Dhaka University Campus

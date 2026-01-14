@@ -16,7 +16,7 @@ type ItemPayload = {
 
 export default function AddItemPage() {
   const router = useRouter();
-  const { token, loading } = useAuth();
+  const { user, token, loading } = useAuth();
   const [form, setForm] = useState<ItemPayload>({
     title: "",
     description: "",
@@ -34,10 +34,17 @@ export default function AddItemPage() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!token) return;
+    if (!token || !user) return;
     setSubmitting(true);
     try {
-      await apiClient.post("/api/items", form, { authenticated: true });
+      const payload = {
+        ...form,
+        reporter: {
+          name: user.displayName || user.email?.split("@")[0] || "User",
+          email: user.email || "",
+        },
+      };
+      await apiClient.post("/api/items", payload, { authenticated: true });
       toast.success("Item reported successfully");
       router.push("/items");
     } catch (err) {

@@ -15,6 +15,7 @@ export default function Navbar() {
   const router = useRouter();
   const { user, token, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -22,16 +23,39 @@ export default function Navbar() {
     setMounted(true);
   }, []);
 
+  // Close dropdown when clicking outside or navigating
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (profileDropdownOpen && !target.closest('.profile-dropdown-container')) {
+        setProfileDropdownOpen(false);
+      }
+    };
+
+    if (profileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [profileDropdownOpen]);
+
+  // Close dropdown when pathname changes
+  useEffect(() => {
+    setProfileDropdownOpen(false);
+  }, [pathname]);
+
   const handleLogout = () => {
     logout();
     toast.success("Logged out");
     router.push("/");
+    setProfileDropdownOpen(false);
   };
 
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/items", label: "Items" },
-    ...(token ? [{ href: "/add-item", label: "Report Item" }] : []),
+    ...(token ? [
+      { href: "/add-item", label: "Report Item" },
+    ] : []),
   ];
 
   return (
@@ -62,33 +86,84 @@ export default function Navbar() {
           {token ? (
             <>
               {user ? (
-                <div className="flex items-center gap-2 rounded-full border border-base bg-card px-3 py-1.5">
-                  <div className="relative h-8 w-8 overflow-hidden rounded-full border border-base bg-primary/10">
-                    {user.photoURL ? (
-                      <Image
-                        src={user.photoURL}
-                        alt={user.displayName || user.email || "User"}
-                        fill
-                        sizes="32px"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-primary-blue-2 text-xs font-bold text-white">
-                        {(user.displayName || user.email || "U")[0].toUpperCase()}
+                <div className="relative profile-dropdown-container">
+                  <button
+                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                    className="flex items-center gap-2 rounded-full border border-base bg-card px-3 py-1.5 transition hover:border-primary hover:shadow-sm"
+                  >
+                    <div className="relative h-8 w-8 overflow-hidden rounded-full border border-base bg-primary/10">
+                      {user.photoURL ? (
+                        <Image
+                          src={user.photoURL}
+                          alt={user.displayName || user.email || "User"}
+                          fill
+                          sizes="32px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-primary-blue-2 text-xs font-bold text-white">
+                          {(user.displayName || user.email || "U")[0].toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-sm font-semibold text-primary">
+                      {user.displayName || user.email?.split("@")[0] || "User"}
+                    </span>
+                    <svg
+                      className={cn(
+                        "h-4 w-4 text-muted transition-transform",
+                        profileDropdownOpen && "rotate-180"
+                      )}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {profileDropdownOpen && (
+                    <div className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-base bg-card shadow-lg backdrop-blur-lg">
+                      <div className="py-1">
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className={cn(
+                            "flex items-center gap-3 px-4 py-2 text-sm transition",
+                            pathname === "/dashboard"
+                              ? "bg-primary/10 text-primary font-semibold"
+                              : "text-muted hover:bg-black/5 dark:hover:bg-white/5"
+                          )}
+                        >
+                          <span className="text-lg">📊</span>
+                          <span>Dashboard</span>
+                        </Link>
+                        <Link
+                          href="/profile"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className={cn(
+                            "flex items-center gap-3 px-4 py-2 text-sm transition",
+                            pathname === "/profile"
+                              ? "bg-primary/10 text-primary font-semibold"
+                              : "text-muted hover:bg-black/5 dark:hover:bg-white/5"
+                          )}
+                        >
+                          <span className="text-lg">👤</span>
+                          <span>My Profile</span>
+                        </Link>
+                        <div className="my-1 border-t border-base" />
+                        <button
+                          onClick={handleLogout}
+                          className="flex w-full items-center gap-3 px-4 py-2 text-sm text-muted transition hover:bg-error/10 hover:text-error"
+                        >
+                          <span className="text-lg">🚪</span>
+                          <span>Logout</span>
+                        </button>
                       </div>
-                    )}
-                  </div>
-                  <span className="text-sm font-semibold text-primary">
-                    {user.displayName || user.email?.split("@")[0] || "User"}
-                  </span>
+                    </div>
+                  )}
                 </div>
               ) : null}
-              <button
-                onClick={handleLogout}
-                className="btn btn-secondary text-sm font-semibold"
-              >
-                Logout
-              </button>
             </>
           ) : (
             <>
@@ -156,38 +231,64 @@ export default function Navbar() {
             {token ? (
               <>
                 {user ? (
-                  <div className="flex items-center gap-3 rounded-xl border border-base bg-card px-3 py-2">
-                    <div className="relative h-10 w-10 overflow-hidden rounded-full border border-base bg-primary/10">
-                      {user.photoURL ? (
-                        <Image
-                          src={user.photoURL}
-                          alt={user.displayName || user.email || "User"}
-                          fill
-                          sizes="40px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-primary-blue-2 text-sm font-bold text-white">
-                          {(user.displayName || user.email || "U")[0].toUpperCase()}
-                        </div>
-                      )}
+                  <>
+                    <div className="flex items-center gap-3 rounded-xl border border-base bg-card px-3 py-2">
+                      <div className="relative h-10 w-10 overflow-hidden rounded-full border border-base bg-primary/10">
+                        {user.photoURL ? (
+                          <Image
+                            src={user.photoURL}
+                            alt={user.displayName || user.email || "User"}
+                            fill
+                            sizes="40px"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-primary-blue-2 text-sm font-bold text-white">
+                            {(user.displayName || user.email || "U")[0].toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-primary">
+                          {user.displayName || user.email?.split("@")[0] || "User"}
+                        </p>
+                        {user.email && user.displayName && (
+                          <p className="text-xs text-muted">{user.email}</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-primary">
-                        {user.displayName || user.email?.split("@")[0] || "User"}
-                      </p>
-                      {user.email && user.displayName && (
-                        <p className="text-xs text-muted">{user.email}</p>
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "rounded-xl px-3 py-2 text-sm font-semibold transition",
+                        pathname === "/dashboard"
+                          ? "bg-primary text-white"
+                          : "text-muted hover:bg-black/5 dark:hover:bg-white/5"
                       )}
-                    </div>
-                  </div>
+                    >
+                      📊 Dashboard
+                    </Link>
+                    <Link
+                      href="/profile"
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "rounded-xl px-3 py-2 text-sm font-semibold transition",
+                        pathname === "/profile"
+                          ? "bg-primary text-white"
+                          : "text-muted hover:bg-black/5 dark:hover:bg-white/5"
+                      )}
+                    >
+                      👤 My Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="rounded-xl border border-base px-3 py-2 text-left text-sm font-semibold"
+                    >
+                      🚪 Logout
+                    </button>
+                  </>
                 ) : null}
-                <button
-                  onClick={handleLogout}
-                  className="rounded-xl border border-base px-3 py-2 text-left text-sm font-semibold"
-                >
-                  Logout
-                </button>
               </>
             ) : (
               <>
