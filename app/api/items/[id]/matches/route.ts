@@ -44,15 +44,15 @@ export async function GET(
     const titleKeywords = title
       .toLowerCase()
       .split(/\s+/)
-      .filter((word) => word.length > 2) // Filter out very short words
-      .filter((word) => !["the", "and", "or", "a", "an", "is", "was", "for", "with", "this", "that", "from"].includes(word));
+      .filter((word: string) => word.length > 2) // Filter out very short words
+      .filter((word: string) => !["the", "and", "or", "a", "an", "is", "was", "for", "with", "this", "that", "from"].includes(word));
 
     // Extract keywords from description
     const descKeywords = (description || "")
       .toLowerCase()
       .split(/\s+/)
-      .filter((word) => word.length > 2)
-      .filter((word) => !["the", "and", "or", "a", "an", "is", "was", "for", "with", "this", "that", "from"].includes(word));
+      .filter((word: string) => word.length > 2)
+      .filter((word: string) => !["the", "and", "or", "a", "an", "is", "was", "for", "with", "this", "that", "from"].includes(word));
 
     // Combine all keywords and remove duplicates
     const allKeywords = [...new Set([...titleKeywords, ...descKeywords])].filter(k => k.length > 0);
@@ -87,7 +87,7 @@ export async function GET(
       const locationWords = location
         .toLowerCase()
         .split(/[\s,]+/)
-        .filter((word) => word.length > 2);
+        .filter((word: string) => word.length > 2);
       
       if (locationWords.length > 0) {
         orConditions.push({
