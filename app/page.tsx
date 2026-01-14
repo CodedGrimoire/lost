@@ -5,15 +5,24 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { ItemCard, ItemCardSkeleton } from "@/components/ItemCard";
+import { MatchedItemCard } from "@/components/MatchedItemCard";
 import { apiClient } from "@/lib/apiClient";
 import { Item } from "@/types/item";
 import { RecentLostItems } from "@/components/RecentLostItems";
 import { CampusMap } from "@/components/CampusMap";
-import { HiAcademicCap, HiCheckCircle, HiBell, HiSearch, HiCamera, HiLocationMarker, HiUserGroup, HiGlobe, HiMap } from "react-icons/hi";
+import { HiAcademicCap, HiCheckCircle, HiBell, HiSearch, HiCamera, HiLocationMarker, HiUserGroup, HiGlobe, HiMap, HiHeart } from "react-icons/hi";
+
+type MatchedItem = Item & {
+  matchedAt?: string;
+  claimerId?: string;
+  claimMessage?: string;
+};
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
+  const [matchedItems, setMatchedItems] = useState<MatchedItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMatched, setLoadingMatched] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -36,6 +45,23 @@ export default function Home() {
     };
 
     fetchItems();
+  }, []);
+
+  // Fetch recent matched items
+  useEffect(() => {
+    const fetchMatchedItems = async () => {
+      try {
+        const response = await apiClient.get<MatchedItem[]>("/api/items/matched");
+        setMatchedItems(Array.isArray(response) ? response : []);
+      } catch (err) {
+        console.error("Error fetching matched items:", err);
+        setMatchedItems([]);
+      } finally {
+        setLoadingMatched(false);
+      }
+    };
+
+    fetchMatchedItems();
   }, []);
 
   const foundItems = useMemo(
@@ -116,6 +142,33 @@ export default function Home() {
           </Link>
         </div>
         <RecentLostItems />
+      </section>
+
+      <section className="section-shell">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="section-title">Recent matched items</h2>
+            <p className="section-subtitle">Successfully reunited items with their owners.</p>
+          </div>
+        </div>
+        {loadingMatched ? (
+          <div className="grid gap-4 md:grid-cols-3">
+            <ItemCardSkeleton />
+            <ItemCardSkeleton />
+            <ItemCardSkeleton />
+          </div>
+        ) : matchedItems.length ? (
+          <div className="grid gap-4 md:grid-cols-3">
+            {matchedItems.map((item) => (
+              <MatchedItemCard key={item._id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-lg border border-base bg-card p-8 text-center">
+            <HiHeart className="text-4xl text-muted mx-auto mb-3" />
+            <p className="text-sm text-muted">No recent matches yet. Be the first to help reunite an item!</p>
+          </div>
+        )}
       </section>
 
       <section className="section-shell">

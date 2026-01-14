@@ -9,6 +9,7 @@ export type Item = {
   reportedBy?: string; // Firebase UID
   claimed?: boolean; // default false
   claimedBy?: string; // Firebase UID (when approved)
+  approved?: boolean; // default false - true when owner approves the claim (matched items)
   reporter?: {
     name?: string;
     email?: string;
@@ -21,7 +22,9 @@ export type Claim = {
   itemTitle: string;
   claimedBy: string; // Firebase UID
   message: string; // proof text
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "received";
+  meetupAddress?: string; // Address for meetup (set when approved)
+  receivedAt?: string; // Timestamp when item was received (for cleanup)
   createdAt: string;
 };
 

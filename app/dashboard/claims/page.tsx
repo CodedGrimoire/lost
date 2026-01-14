@@ -8,7 +8,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { apiClient } from "@/lib/apiClient";
 import { Claim, Item } from "@/types/item";
 import { Skeleton } from "@/components/Skeleton";
-import { HiCheckCircle, HiX, HiClock, HiArrowLeft } from "react-icons/hi";
+import { HiCheckCircle, HiX, HiClock, HiArrowLeft, HiLocationMarker } from "react-icons/hi";
 import { cn } from "@/lib/utils";
 
 type ClaimWithItem = Claim & {
@@ -21,6 +21,9 @@ export default function DashboardClaimsPage() {
   const [claims, setClaims] = useState<ClaimWithItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [approveModalOpen, setApproveModalOpen] = useState(false);
+  const [selectedClaim, setSelectedClaim] = useState<ClaimWithItem | null>(null);
+  const [meetupAddress, setMeetupAddress] = useState("");
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -83,18 +86,91 @@ export default function DashboardClaimsPage() {
     fetchClaims();
   }, [token, user?.email, user?.uid]);
 
-  const handleApproveReject = async (claimId: string, status: "approved" | "rejected") => {
+  const handleApproveClick = (claim: ClaimWithItem) => {
+    setSelectedClaim(claim);
+    setMeetupAddress("");
+    setApproveModalOpen(true);
+  };
+
+  const handleApproveConfirm = async () => {
+    if (!selectedClaim || !meetupAddress.trim()) {
+      toast.error("Please enter a meetup address");
+      return;
+    }
+
+    if (processing) return;
+
+    setProcessing(selectedClaim._id);
+    try {
+      await apiClient.patch(
+        `/api/claims/${selectedClaim._id}`,
+        { status: "approved", meetupAddress: meetupAddress.trim() },
+        { authenticated: true }
+      );
+
+      toast.success("Claim approved successfully");
+      setApproveModalOpen(false);
+      setSelectedClaim(null);
+      setMeetupAddress("");
+
+      // Refresh claims
+      if (user?.email) {
+        const userItems = await apiClient.get<Item[]>(
+          `/api/user/items?email=${encodeURIComponent(user.email!)}`,
+          { authenticated: true }
+        );
+
+        const foundItems = Array.isArray(userItems)
+          ? userItems.filter((item) => item.status === "found" && item.reportedBy === user.uid)
+          : [];
+
+        const allClaims: ClaimWithItem[] = [];
+        for (const item of foundItems) {
+          try {
+            const itemClaims = await apiClient.get<Claim[]>(
+              `/api/claims?itemId=${item._id}`,
+              { authenticated: true }
+            );
+            const claimsArray = Array.isArray(itemClaims) ? itemClaims : [];
+            allClaims.push(
+              ...claimsArray.map((claim) => ({
+                ...claim,
+                item,
+              }))
+            );
+          } catch (err) {
+            // ignore
+          }
+        }
+
+        allClaims.sort((a, b) => {
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA;
+        });
+
+        setClaims(allClaims);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to update claim.";
+      toast.error(message);
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  const handleReject = async (claimId: string) => {
     if (processing) return;
 
     setProcessing(claimId);
     try {
       await apiClient.patch(
         `/api/claims/${claimId}`,
-        { status },
+        { status: "rejected" },
         { authenticated: true }
       );
 
-      toast.success(`Claim ${status === "approved" ? "approved" : "rejected"} successfully`);
+      toast.success("Claim rejected successfully");
 
       // Refresh claims
       if (user?.email) {
@@ -217,14 +293,14 @@ export default function DashboardClaimsPage() {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleApproveReject(claim._id, "approved")}
+                      onClick={() => handleApproveClick(claim)}
                       disabled={processing === claim._id}
                       className="btn btn-primary flex items-center gap-2 disabled:opacity-50"
                     >
                       <HiCheckCircle /> Approve
                     </button>
                     <button
-                      onClick={() => handleApproveReject(claim._id, "rejected")}
+                      onClick={() => handleReject(claim._id)}
                       disabled={processing === claim._id}
                       className="btn btn-secondary flex items-center gap-2 disabled:opacity-50"
                     >
@@ -292,10 +368,86 @@ export default function DashboardClaimsPage() {
                         minute: "2-digit",
                       })}
                     </p>
+                    {claim.status === "approved" && claim.meetupAddress && (
+                      <div className="mt-2 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-900/20">
+                        <div className="flex items-start gap-2">
+                          <HiLocationMarker className="mt-0.5 text-green-600 dark:text-green-400" />
+                          <div>
+                            <p className="text-sm font-semibold text-green-800 dark:text-green-300">
+                              Meetup Address:
+                            </p>
+                            <p className="text-sm text-green-700 dark:text-green-400">
+                              {claim.meetupAddress}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Approve Modal */}
+      {approveModalOpen && selectedClaim && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-2xl border border-base bg-card p-6 shadow-xl">
+            <button
+              onClick={() => {
+                setApproveModalOpen(false);
+                setSelectedClaim(null);
+                setMeetupAddress("");
+              }}
+              className="absolute right-4 top-4 rounded-full p-1 text-muted transition hover:bg-black/5 dark:hover:bg-white/5"
+            >
+              <HiX className="text-xl" />
+            </button>
+
+            <h2 className="text-2xl font-bold mb-2">Approve Claim</h2>
+            <p className="text-muted mb-4">
+              Please provide the meetup address where the claimer can receive{" "}
+              <span className="font-semibold">{selectedClaim.itemTitle}</span>.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-primary mb-2">
+                  Meetup Address *
+                </label>
+                <textarea
+                  value={meetupAddress}
+                  onChange={(e) => setMeetupAddress(e.target.value)}
+                  rows={4}
+                  className="w-full rounded-lg border border-base bg-surface px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                  placeholder="Enter the address where the claimer should meet you to receive the item..."
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleApproveConfirm}
+                  disabled={processing === selectedClaim._id || !meetupAddress.trim()}
+                  className="btn btn-primary flex-1 disabled:opacity-50"
+                >
+                  {processing === selectedClaim._id ? "Approving..." : "Approve Claim"}
+                </button>
+                <button
+                  onClick={() => {
+                    setApproveModalOpen(false);
+                    setSelectedClaim(null);
+                    setMeetupAddress("");
+                  }}
+                  className="btn btn-secondary"
+                  disabled={processing === selectedClaim._id}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

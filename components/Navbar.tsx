@@ -8,7 +8,7 @@ import { useTheme } from "next-themes";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { HiChartBar, HiUser, HiLogout, HiMoon, HiSun, HiX, HiMenu, HiBell } from "react-icons/hi";
+import { HiChartBar, HiUser, HiLogout, HiMoon, HiSun, HiX, HiMenu, HiBell, HiLocationMarker } from "react-icons/hi";
 import { apiClient } from "@/lib/apiClient";
 import { Notification } from "@/types/item";
 
@@ -195,8 +195,23 @@ export default function Navbar() {
                                 )} />
                                 <div className="flex-1 min-w-0">
                                   <p className={cn("text-xs", !notification.read ? "font-semibold" : "text-muted")}>
-                                    {notification.message}
+                                    {notification.message.split("Meetup address:")[0].trim()}
                                   </p>
+                                  {notification.message.includes("Meetup address:") && (
+                                    <div className="mt-2 rounded border border-green-200 bg-green-50 p-2 dark:border-green-800 dark:bg-green-900/20">
+                                      <div className="flex items-start gap-1.5">
+                                        <HiLocationMarker className="mt-0.5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                        <div className="flex-1">
+                                          <p className="text-xs font-semibold text-green-800 dark:text-green-300">
+                                            Meetup Address:
+                                          </p>
+                                          <p className="text-xs text-green-700 dark:text-green-400 mt-0.5">
+                                            {notification.message.split("Meetup address:")[1]?.trim()}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
                                   <p className="text-xs text-muted mt-1">
                                     {new Date(notification.createdAt).toLocaleDateString(undefined, {
                                       month: "short",

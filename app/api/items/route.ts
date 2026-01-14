@@ -10,13 +10,28 @@ export async function GET(req: Request) {
 
     const client = await clientPromise;
     const db = client.db();
+    const { ObjectId } = await import("mongodb");
 
-    const query =
+    // Get all items with received claims (these should be excluded from normal listings)
+    const receivedClaims = await db.collection("claims")
+      .find({ status: "received" })
+      .toArray();
+    
+    const receivedItemIds = receivedClaims.map(claim => 
+      typeof claim.itemId === "string" ? new ObjectId(claim.itemId) : claim.itemId
+    );
+
+    const query: any =
       filter === "lost"
         ? { status: "lost" }
         : filter === "found"
           ? { status: "found" }
           : {};
+
+    // Exclude items that have been received
+    if (receivedItemIds.length > 0) {
+      query._id = { $nin: receivedItemIds };
+    }
 
     const items = await db.collection("items").find(query).toArray();
 

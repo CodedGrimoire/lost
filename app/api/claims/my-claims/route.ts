@@ -13,15 +13,11 @@ async function getUserIdFromToken(token: string): Promise<string | null> {
   
   // Firebase ID tokens are JWTs - decode to get UID
   try {
-    // JWT format: header.payload.signature
-    // The payload contains the user_id in the 'sub' or 'user_id' field
     const parts = token.split(".");
     if (parts.length === 3) {
-      // Decode the payload (base64url)
       const payload = JSON.parse(
         Buffer.from(parts[1].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString()
       );
-      // Firebase uses 'user_id' or 'sub' for the UID
       return payload.user_id || payload.sub || null;
     }
   } catch (error) {
@@ -31,11 +27,8 @@ async function getUserIdFromToken(token: string): Promise<string | null> {
   return null;
 }
 
-// PATCH /api/notifications/:id/read - Mark notification as read
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+// GET /api/claims/my-claims - Get all claims made by the current user
+export async function GET(request: NextRequest) {
   try {
     const token = getAuthTokenFromRequest(request);
     
@@ -54,34 +47,18 @@ export async function PATCH(
       );
     }
 
-    const { id: notificationId } = await params;
     const client = await clientPromise;
     const db = client.db();
 
-    const { ObjectId } = await import("mongodb");
+    // Get all claims made by this user
+    const claims = await db.collection("claims")
+      .find({ claimedBy: userId })
+      .sort({ createdAt: -1 })
+      .toArray();
 
-    // Verify the notification belongs to the user
-    const notification = await db.collection("notifications").findOne({
-      _id: new ObjectId(notificationId),
-      userId,
-    });
-
-    if (!notification) {
-      return NextResponse.json(
-        { error: "Notification not found" },
-        { status: 404 }
-      );
-    }
-
-    // Mark as read
-    await db.collection("notifications").updateOne(
-      { _id: new ObjectId(notificationId) },
-      { $set: { read: true } }
-    );
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json(claims);
   } catch (error) {
-    console.error("Error marking notification as read:", error);
+    console.error("Error fetching user claims:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

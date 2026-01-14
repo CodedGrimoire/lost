@@ -77,11 +77,19 @@ export async function PATCH(
 
     const { id: claimId } = await params;
     const body = await request.json();
-    const { status } = body;
+    const { status, meetupAddress } = body;
 
     if (!status || !["approved", "rejected"].includes(status)) {
       return NextResponse.json(
         { error: "status must be 'approved' or 'rejected'" },
+        { status: 400 }
+      );
+    }
+
+    // If approving, meetupAddress is required
+    if (status === "approved" && !meetupAddress) {
+      return NextResponse.json(
+        { error: "meetupAddress is required when approving a claim" },
         { status: 400 }
       );
     }
@@ -143,19 +151,20 @@ export async function PATCH(
         );
       }
 
-      // Update claim to approved
+      // Update claim to approved with meetup address
       await db.collection("claims").updateOne(
         { _id: new ObjectId(claimId) },
-        { $set: { status: "approved" } }
+        { $set: { status: "approved", meetupAddress: meetupAddress } }
       );
 
-      // Update item to claimed
+      // Update item to claimed and approved (this marks it as matched)
       await db.collection("items").updateOne(
         { _id: typeof claim.itemId === "string" ? new ObjectId(claim.itemId) : claim.itemId },
         {
           $set: {
             claimed: true,
             claimedBy: claim.claimedBy,
+            approved: true, // Flag that owner approved this claim (matched item)
           },
         }
       );
@@ -199,7 +208,7 @@ export async function PATCH(
         type: "claim_approved" as const,
         itemId: typeof claim.itemId === "string" ? claim.itemId : claim.itemId.toString(),
         itemTitle: claim.itemTitle,
-        message: `Your claim for ${claim.itemTitle} was approved`,
+        message: `Your claim for ${claim.itemTitle} was approved. Meetup address: ${meetupAddress}`,
         read: false,
         createdAt: now,
       };

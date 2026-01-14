@@ -6,10 +6,29 @@ export const runtime = "nodejs";
 
 // Helper to get user UID from token
 async function getUserIdFromToken(token: string): Promise<string | null> {
+  // For demo tokens
   if (token.startsWith("demo_")) {
     return token;
   }
-  return token;
+  
+  // Firebase ID tokens are JWTs - decode to get UID
+  try {
+    // JWT format: header.payload.signature
+    // The payload contains the user_id in the 'sub' or 'user_id' field
+    const parts = token.split(".");
+    if (parts.length === 3) {
+      // Decode the payload (base64url)
+      const payload = JSON.parse(
+        Buffer.from(parts[1].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString()
+      );
+      // Firebase uses 'user_id' or 'sub' for the UID
+      return payload.user_id || payload.sub || null;
+    }
+  } catch (error) {
+    console.error("Error decoding token:", error);
+  }
+  
+  return null;
 }
 
 // GET /api/notifications - Get notifications for current user
