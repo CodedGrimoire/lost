@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HiLocationMarker, HiMail, HiPhone } from "react-icons/hi";
 
 export default function Footer() {
   return (
@@ -12,9 +13,9 @@ export default function Footer() {
               Keeping campus items safe and findable. Stay alert, stay kind.
             </p>
             <div className="space-y-2 text-sm text-muted">
-              <p>📍 Dhaka University Campus</p>
-              <p>📧 support@campuslostfound.edu</p>
-              <p>📞 +880-XXX-XXXX</p>
+              <p className="flex items-center gap-2"><HiLocationMarker /> Dhaka University Campus</p>
+              <p className="flex items-center gap-2"><HiMail /> support@campuslostfound.edu</p>
+              <p className="flex items-center gap-2"><HiPhone /> +880-XXX-XXXX</p>
             </div>
           </div>
 

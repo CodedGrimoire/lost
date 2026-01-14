@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Item } from "@/types/item";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "./Skeleton";
+import { HiLocationMarker, HiCalendar } from "react-icons/hi";
 
 export function ItemCard({ item }: { item: Item }) {
   return (
@@ -43,10 +44,14 @@ export function ItemCard({ item }: { item: Item }) {
         {item.description || "No description provided."}
       </p>
       <div className="flex flex-wrap gap-3 text-xs text-muted">
-        {item.location ? <span>📍 {item.location}</span> : null}
+        {item.location ? (
+          <span className="flex items-center gap-1">
+            <HiLocationMarker /> {item.location}
+          </span>
+        ) : null}
         {item.createdAt ? (
-          <span>
-            🗓{" "}
+          <span className="flex items-center gap-1">
+            <HiCalendar />{" "}
             {new Date(item.createdAt).toLocaleDateString(undefined, {
               month: "short",
               day: "numeric",

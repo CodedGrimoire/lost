@@ -9,6 +9,7 @@ import { apiClient } from "@/lib/apiClient";
 import { Item } from "@/types/item";
 import { RecentLostItems } from "@/components/RecentLostItems";
 import { CampusMap } from "@/components/CampusMap";
+import { HiAcademicCap, HiCheckCircle, HiBell, HiSearch, HiCamera, HiLocationMarker, HiUserGroup, HiGlobe, HiMap } from "react-icons/hi";
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
@@ -47,7 +48,7 @@ export default function Home() {
       <section className="grid items-center gap-10 rounded-3xl bg-card px-6 py-10 shadow-sm md:grid-cols-2 md:px-10 md:py-14 hero-shell">
         <div className="space-y-6">
           <p className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-sm font-semibold text-primary shadow-sm">
-            🎒 Campus Safety First
+            <HiAcademicCap /> Campus Safety First
           </p>
           <h1 className="text-4xl font-bold leading-tight md:text-5xl gradient-text">
             Find lost belongings fast with CampusLost+Found
@@ -64,9 +65,9 @@ export default function Home() {
             </Link>
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-muted">
-            <span className="flex items-center gap-2">✅ Verified campus community</span>
-            <span className="flex items-center gap-2">🔔 Instant updates</span>
-            <span className="flex items-center gap-2">🧭 Clear pickup details</span>
+            <span className="flex items-center gap-2"><HiCheckCircle /> Verified campus community</span>
+            <span className="flex items-center gap-2"><HiBell /> Instant updates</span>
+            <span className="flex items-center gap-2"><HiMap /> Clear pickup details</span>
           </div>
         </div>
         <div className="relative">
@@ -194,19 +195,22 @@ export default function Home() {
           <h3 className="text-xl font-semibold">Key Features</h3>
           <div className="grid gap-4 md:grid-cols-3">
             {[
-              { icon: "🔍", title: "Easy Search", desc: "Quickly search through all reported items with filters and keywords." },
-              { icon: "📸", title: "Photo Support", desc: "Upload images to help identify lost items more accurately." },
-              { icon: "📍", title: "Location Tracking", desc: "Pinpoint exact locations where items were found or lost." },
-              { icon: "🔔", title: "Instant Updates", desc: "Get notified when items matching your search are posted." },
-              { icon: "✅", title: "Verified Users", desc: "Secure authentication ensures only campus members can participate." },
-              { icon: "🤝", title: "Community Driven", desc: "Built by students, for students, fostering a helpful campus culture." },
-            ].map((feature) => (
-              <div key={feature.title} className="space-y-2">
-                <div className="text-2xl">{feature.icon}</div>
-                <h4 className="font-semibold">{feature.title}</h4>
-                <p className="text-sm text-muted">{feature.desc}</p>
-              </div>
-            ))}
+              { icon: HiSearch, title: "Easy Search", desc: "Quickly search through all reported items with filters and keywords." },
+              { icon: HiCamera, title: "Photo Support", desc: "Upload images to help identify lost items more accurately." },
+              { icon: HiLocationMarker, title: "Location Tracking", desc: "Pinpoint exact locations where items were found or lost." },
+              { icon: HiBell, title: "Instant Updates", desc: "Get notified when items matching your search are posted." },
+              { icon: HiCheckCircle, title: "Verified Users", desc: "Secure authentication ensures only campus members can participate." },
+              { icon: HiUserGroup, title: "Community Driven", desc: "Built by students, for students, fostering a helpful campus culture." },
+            ].map((feature) => {
+              const IconComponent = feature.icon;
+              return (
+                <div key={feature.title} className="space-y-2">
+                  <IconComponent className="text-2xl text-primary" />
+                  <h4 className="font-semibold">{feature.title}</h4>
+                  <p className="text-sm text-muted">{feature.desc}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -222,11 +226,11 @@ export default function Home() {
         <div className="mt-4 rounded-xl border border-base bg-card p-4">
           <div className="flex flex-wrap gap-6 text-sm">
             <div>
-              <p className="font-semibold text-primary">📍 Address</p>
+              <p className="font-semibold text-primary flex items-center gap-2"><HiLocationMarker /> Address</p>
               <p className="text-muted">Dhaka University Area, Dhaka, Bangladesh</p>
             </div>
             <div>
-              <p className="font-semibold text-primary">🌐 Coordinates</p>
+              <p className="font-semibold text-primary flex items-center gap-2"><HiGlobe /> Coordinates</p>
               <p className="text-muted">23.7336° N, 90.3927° E</p>
             </div>
           </div>

@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { ItemLocationMap } from "@/components/ItemLocationMap";
 import { Skeleton } from "@/components/Skeleton";
 import { Loader } from "@/components/Loader";
+import { HiSearch, HiCheckCircle, HiLocationMarker, HiCalendar, HiCamera, HiDocumentText, HiMap } from "react-icons/hi";
+import { HiArrowLeft, HiArrowPath } from "react-icons/hi2";
 
 export default function ItemDetailsPage() {
   const params = useParams();
@@ -74,15 +76,17 @@ export default function ItemDetailsPage() {
   if (error || !item) {
     return (
       <div className="space-y-6 rounded-2xl border border-red-200 bg-red-50 p-8 text-center dark:border-red-800 dark:bg-red-900/20 animate-fade-in">
-        <div className="text-5xl mb-4">😕</div>
+        <div className="flex justify-center mb-4">
+          <HiSearch className="text-5xl text-red-500" />
+        </div>
         <h2 className="text-2xl font-bold text-red-700 dark:text-red-300">Unable to load this item</h2>
         <p className="text-muted">{error || "Item may have been removed."}</p>
         <div className="flex justify-center gap-3 pt-4">
-          <Link href="/items" className="btn btn-secondary">
-            ← Back to items
+          <Link href="/items" className="btn btn-secondary flex items-center gap-2">
+            <HiArrowLeft /> Back to items
           </Link>
-          <button onClick={() => router.refresh()} className="btn btn-primary">
-            🔄 Retry
+          <button onClick={() => router.refresh()} className="btn btn-primary flex items-center gap-2">
+            <HiArrowPath /> Retry
           </button>
         </div>
       </div>
@@ -98,23 +102,23 @@ export default function ItemDetailsPage() {
             <h1 className="text-4xl font-bold leading-tight md:text-5xl">{item.title}</h1>
             <span
               className={cn(
-                "badge text-sm",
+                "badge text-sm flex items-center gap-1",
                 item.status === "lost" ? "badge-lost" : "badge-found",
               )}
             >
-              {item.status === "lost" ? "🔍 Lost" : "✅ Found"}
+              {item.status === "lost" ? <><HiSearch /> Lost</> : <><HiCheckCircle /> Found</>}
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted">
             {item.location && (
               <div className="flex items-center gap-2">
-                <span className="text-lg">📍</span>
+                <HiLocationMarker className="text-lg" />
                 <span className="font-medium">{item.location}</span>
               </div>
             )}
             {item.createdAt && (
               <div className="flex items-center gap-2">
-                <span className="text-lg">🗓</span>
+                <HiCalendar className="text-lg" />
                 <span>
                   {new Date(item.createdAt).toLocaleDateString(undefined, {
                     month: "long",
@@ -147,7 +151,7 @@ export default function ItemDetailsPage() {
               ) : (
                 <div className="flex h-full items-center justify-center">
                   <div className="text-center space-y-2">
-                    <div className="text-6xl">📷</div>
+                    <HiCamera className="text-6xl text-muted mx-auto" />
                     <p className="text-muted font-medium">No image provided</p>
                   </div>
                 </div>
@@ -158,7 +162,7 @@ export default function ItemDetailsPage() {
           {/* Description Card */}
           <div className="card space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">📝</span>
+              <HiDocumentText className="text-2xl" />
               <h2 className="text-xl font-bold">Description</h2>
             </div>
             <p className="text-muted leading-relaxed">
@@ -206,7 +210,7 @@ export default function ItemDetailsPage() {
             <div className="card sticky top-24 p-0">
               <div className="px-6 pt-6 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">🗺️</span>
+                  <HiMap className="text-2xl" />
                   <h2 className="text-xl font-bold">Location Map</h2>
                 </div>
               </div>
@@ -217,7 +221,7 @@ export default function ItemDetailsPage() {
           ) : (
             <div className="card space-y-4">
               <div className="flex items-center gap-2">
-                <span className="text-2xl">🗺️</span>
+                <HiMap className="text-2xl" />
                 <h2 className="text-xl font-bold">Location Map</h2>
               </div>
               <div className="flex h-[400px] items-center justify-center rounded-xl border border-base bg-card">

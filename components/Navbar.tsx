@@ -8,6 +8,7 @@ import { useTheme } from "next-themes";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { HiChartBar, HiUser, HiLogout, HiMoon, HiSun, HiX, HiMenu } from "react-icons/hi";
 
 export default function Navbar() {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -135,7 +136,7 @@ export default function Navbar() {
                               : "text-muted hover:bg-black/5 dark:hover:bg-white/5"
                           )}
                         >
-                          <span className="text-lg">📊</span>
+                          <HiChartBar className="text-lg" />
                           <span>Dashboard</span>
                         </Link>
                         <Link
@@ -148,7 +149,7 @@ export default function Navbar() {
                               : "text-muted hover:bg-black/5 dark:hover:bg-white/5"
                           )}
                         >
-                          <span className="text-lg">👤</span>
+                          <HiUser className="text-lg" />
                           <span>My Profile</span>
                         </Link>
                         <div className="my-1 border-t border-base" />
@@ -156,7 +157,7 @@ export default function Navbar() {
                           onClick={handleLogout}
                           className="flex w-full items-center gap-3 px-4 py-2 text-sm text-muted transition hover:bg-error/10 hover:text-error"
                         >
-                          <span className="text-lg">🚪</span>
+                          <HiLogout className="text-lg" />
                           <span>Logout</span>
                         </button>
                       </div>
@@ -196,7 +197,7 @@ export default function Navbar() {
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
             className="ml-2 rounded-full border border-base p-2 text-lg transition hover:bg-black/5 dark:hover:bg-white/10"
           >
-            {mounted ? (theme === "dark" || resolvedTheme === "dark" ? "🌙" : "☀️") : "…"}
+            {mounted ? (theme === "dark" || resolvedTheme === "dark" ? <HiMoon /> : <HiSun />) : "…"}
           </button>
         </nav>
 
@@ -206,7 +207,7 @@ export default function Navbar() {
             className="rounded-full border border-base p-2"
             onClick={() => setOpen((prev) => !prev)}
           >
-            {open ? "✕" : "☰"}
+            {open ? <HiX className="text-lg" /> : <HiMenu className="text-lg" />}
           </button>
         </div>
       </div>
@@ -261,31 +262,31 @@ export default function Navbar() {
                       href="/dashboard"
                       onClick={() => setOpen(false)}
                       className={cn(
-                        "rounded-xl px-3 py-2 text-sm font-semibold transition",
+                        "flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition",
                         pathname === "/dashboard"
                           ? "bg-primary text-white"
                           : "text-muted hover:bg-black/5 dark:hover:bg-white/5"
                       )}
                     >
-                      📊 Dashboard
+                      <HiChartBar /> Dashboard
                     </Link>
                     <Link
                       href="/profile"
                       onClick={() => setOpen(false)}
                       className={cn(
-                        "rounded-xl px-3 py-2 text-sm font-semibold transition",
+                        "flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition",
                         pathname === "/profile"
                           ? "bg-primary text-white"
                           : "text-muted hover:bg-black/5 dark:hover:bg-white/5"
                       )}
                     >
-                      👤 My Profile
+                      <HiUser /> My Profile
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="rounded-xl border border-base px-3 py-2 text-left text-sm font-semibold"
+                      className="flex items-center gap-2 rounded-xl border border-base px-3 py-2 text-left text-sm font-semibold"
                     >
-                      🚪 Logout
+                      <HiLogout /> Logout
                     </button>
                   </>
                 ) : null}
@@ -321,12 +322,12 @@ export default function Navbar() {
             <button
               aria-label="Toggle theme"
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className="rounded-xl border border-base px-3 py-2 text-left text-sm font-semibold"
+              className="flex items-center gap-2 rounded-xl border border-base px-3 py-2 text-left text-sm font-semibold"
             >
               {mounted
                 ? theme === "dark" || resolvedTheme === "dark"
-                  ? "🌙 Dark"
-                  : "☀️ Light"
+                  ? <><HiMoon /> Dark</>
+                  : <><HiSun /> Light</>
                 : "…"}
             </button>
           </div>

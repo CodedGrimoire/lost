@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { Loader } from "@/components/Loader";
 import { Skeleton } from "@/components/Skeleton";
+import { HiCheckCircle, HiMail, HiChartBar, HiPlus, HiSearch, HiHome } from "react-icons/hi";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -69,11 +70,11 @@ export default function ProfilePage() {
             </div>
             <div className="flex flex-wrap gap-2 justify-center md:justify-start">
               <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
-                ✅ Verified User
+                <HiCheckCircle /> Verified User
               </span>
               {user.emailVerified && (
                 <span className="inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1 text-sm font-semibold text-success">
-                  ✉️ Email Verified
+                  <HiMail /> Email Verified
                 </span>
               )}
             </div>
@@ -140,8 +141,8 @@ export default function ProfilePage() {
             href="/dashboard"
             className="flex items-center gap-4 rounded-lg border border-base bg-surface p-4 transition hover:border-primary hover:shadow-md"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl">
-              📊
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <HiChartBar className="text-2xl" />
             </div>
             <div>
               <h3 className="font-semibold">View Dashboard</h3>
@@ -152,8 +153,8 @@ export default function ProfilePage() {
             href="/add-item"
             className="flex items-center gap-4 rounded-lg border border-base bg-surface p-4 transition hover:border-primary hover:shadow-md"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl">
-              ➕
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <HiPlus className="text-2xl" />
             </div>
             <div>
               <h3 className="font-semibold">Report Item</h3>
@@ -164,8 +165,8 @@ export default function ProfilePage() {
             href="/items"
             className="flex items-center gap-4 rounded-lg border border-base bg-surface p-4 transition hover:border-primary hover:shadow-md"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl">
-              🔍
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <HiSearch className="text-2xl" />
             </div>
             <div>
               <h3 className="font-semibold">Browse Items</h3>
@@ -176,8 +177,8 @@ export default function ProfilePage() {
             href="/"
             className="flex items-center gap-4 rounded-lg border border-base bg-surface p-4 transition hover:border-primary hover:shadow-md"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl">
-              🏠
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <HiHome className="text-2xl" />
             </div>
             <div>
               <h3 className="font-semibold">Home</h3>

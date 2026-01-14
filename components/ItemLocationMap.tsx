@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { HiLocationMarker } from "react-icons/hi";
 
 // Dynamically import map components to avoid SSR issues
 const MapContainer = dynamic(
@@ -118,7 +119,7 @@ export function ItemLocationMap({ location, title }: ItemLocationMapProps) {
       {location && !parseLocation(location) && (
         <div className="mt-3 rounded-lg border border-base bg-card p-3">
           <p className="text-sm text-muted">
-            <span className="font-semibold text-primary">📍 Location:</span> {location}
+            <span className="font-semibold text-primary flex items-center gap-1"><HiLocationMarker /> Location:</span> {location}
           </p>
           <p className="text-xs text-muted mt-1">
             Map shows general Dhaka University area. Location description: {location}

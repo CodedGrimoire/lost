@@ -11,6 +11,7 @@ import { Item } from "@/types/item";
 import { ItemCard, ItemCardSkeleton } from "@/components/ItemCard";
 import { Loader } from "@/components/Loader";
 import { Skeleton } from "@/components/Skeleton";
+import { HiUser, HiCube, HiSearch, HiCheckCircle, HiCalendar, HiPlus, HiInbox } from "react-icons/hi";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -104,7 +105,7 @@ export default function DashboardPage() {
             href="/profile"
             className="flex items-center gap-2 rounded-lg border border-base bg-surface px-4 py-2 text-sm font-semibold transition hover:border-primary hover:shadow-md"
           >
-            <span>👤</span>
+            <HiUser />
             <span>View Profile</span>
           </Link>
         </div>
@@ -118,8 +119,8 @@ export default function DashboardPage() {
               <p className="text-sm font-semibold text-muted">Total Items</p>
               <p className="text-3xl font-bold">{stats.total}</p>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl">
-              📦
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <HiCube className="text-2xl" />
             </div>
           </div>
           <p className="text-xs text-muted">All your reported items</p>
@@ -131,8 +132,8 @@ export default function DashboardPage() {
               <p className="text-sm font-semibold text-muted">Lost Items</p>
               <p className="text-3xl font-bold text-warning">{stats.lost}</p>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/10 text-2xl">
-              🔍
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/10">
+              <HiSearch className="text-2xl" />
             </div>
           </div>
           <p className="text-xs text-muted">Items you've lost</p>
@@ -144,8 +145,8 @@ export default function DashboardPage() {
               <p className="text-sm font-semibold text-muted">Found Items</p>
               <p className="text-3xl font-bold text-success">{stats.found}</p>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/10 text-2xl">
-              ✅
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/10">
+              <HiCheckCircle className="text-2xl" />
             </div>
           </div>
           <p className="text-xs text-muted">Items you've found</p>
@@ -157,8 +158,8 @@ export default function DashboardPage() {
               <p className="text-sm font-semibold text-muted">This Week</p>
               <p className="text-3xl font-bold text-info">{stats.recent}</p>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-info/10 text-2xl">
-              📅
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-info/10">
+              <HiCalendar className="text-2xl" />
             </div>
           </div>
           <p className="text-xs text-muted">Items reported this week</p>
@@ -178,9 +179,9 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/add-item"
-            className="btn btn-primary"
+            className="btn btn-primary flex items-center gap-2"
           >
-            ➕ Report New Item
+            <HiPlus /> Report New Item
           </Link>
         </div>
 
@@ -192,7 +193,7 @@ export default function DashboardPage() {
           </div>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-base bg-surface py-12">
-            <div className="text-6xl">📭</div>
+            <HiInbox className="text-6xl text-muted" />
             <div className="text-center">
               <h3 className="text-xl font-semibold">No items reported yet</h3>
               <p className="text-muted mt-1">Start helping the community by reporting a lost or found item!</p>
@@ -218,8 +219,8 @@ export default function DashboardPage() {
             href="/add-item"
             className="flex flex-col items-center gap-3 rounded-lg border border-base bg-surface p-6 text-center transition hover:border-primary hover:shadow-md"
           >
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-3xl">
-              ➕
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <HiPlus className="text-3xl" />
             </div>
             <h3 className="font-semibold">Report Item</h3>
             <p className="text-sm text-muted">Report a lost or found item</p>
@@ -228,8 +229,8 @@ export default function DashboardPage() {
             href="/items"
             className="flex flex-col items-center gap-3 rounded-lg border border-base bg-surface p-6 text-center transition hover:border-primary hover:shadow-md"
           >
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-3xl">
-              🔍
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <HiSearch className="text-3xl" />
             </div>
             <h3 className="font-semibold">Browse All Items</h3>
             <p className="text-sm text-muted">View all lost and found items</p>
@@ -238,8 +239,8 @@ export default function DashboardPage() {
             href="/profile"
             className="flex flex-col items-center gap-3 rounded-lg border border-base bg-surface p-6 text-center transition hover:border-primary hover:shadow-md"
           >
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-3xl">
-              👤
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <HiUser className="text-3xl" />
             </div>
             <h3 className="font-semibold">View Profile</h3>
             <p className="text-sm text-muted">Manage your account settings</p>
