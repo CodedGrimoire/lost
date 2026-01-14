@@ -8,7 +8,9 @@ import { useTheme } from "next-themes";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { HiChartBar, HiUser, HiLogout, HiMoon, HiSun, HiX, HiMenu } from "react-icons/hi";
+import { HiChartBar, HiUser, HiLogout, HiMoon, HiSun, HiX, HiMenu, HiBell } from "react-icons/hi";
+import { apiClient } from "@/lib/apiClient";
+import { Notification } from "@/types/item";
 
 export default function Navbar() {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -17,6 +19,9 @@ export default function Navbar() {
   const { user, token, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -42,7 +47,68 @@ export default function Navbar() {
   // Close dropdown when pathname changes
   useEffect(() => {
     setProfileDropdownOpen(false);
+    setNotificationDropdownOpen(false);
   }, [pathname]);
+
+  // Fetch notifications
+  useEffect(() => {
+    if (!token || !mounted) return;
+
+    const fetchNotifications = async () => {
+      setLoadingNotifications(true);
+      try {
+        const data = await apiClient.get<Notification[]>("/api/notifications", { authenticated: true });
+        setNotifications(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error fetching notifications:", err);
+        setNotifications([]);
+      } finally {
+        setLoadingNotifications(false);
+      }
+    };
+
+    fetchNotifications();
+    // Refresh notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [token, mounted]);
+
+  // Close notification dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (notificationDropdownOpen && !target.closest('.notification-dropdown-container')) {
+        setNotificationDropdownOpen(false);
+      }
+    };
+
+    if (notificationDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [notificationDropdownOpen]);
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.read) {
+      try {
+        await apiClient.patch(
+          `/api/notifications/${notification._id}/read`,
+          {},
+          { authenticated: true }
+        );
+        // Update local state
+        setNotifications(prev =>
+          prev.map(n => n._id === notification._id ? { ...n, read: true } : n)
+        );
+      } catch (err) {
+        console.error("Error marking notification as read:", err);
+      }
+    }
+    setNotificationDropdownOpen(false);
+    router.push(`/items/${notification.itemId}`);
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleLogout = () => {
     logout();
@@ -86,6 +152,70 @@ export default function Navbar() {
           ))}
           {token ? (
             <>
+              {/* Notification Bell */}
+              <div className="relative notification-dropdown-container">
+                <button
+                  onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}
+                  className="relative rounded-full border border-base p-2 text-lg transition hover:bg-black/5 dark:hover:bg-white/10"
+                  aria-label="Notifications"
+                >
+                  <HiBell />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {notificationDropdownOpen && (
+                  <div className="absolute right-0 z-50 mt-2 w-80 max-h-96 overflow-y-auto rounded-lg border border-base bg-card shadow-lg backdrop-blur-lg">
+                    <div className="p-2">
+                      <div className="px-3 py-2 border-b border-base">
+                        <h3 className="font-semibold text-sm">Notifications</h3>
+                      </div>
+                      {loadingNotifications ? (
+                        <div className="p-4 text-center text-sm text-muted">Loading...</div>
+                      ) : notifications.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-muted">No notifications</div>
+                      ) : (
+                        <div className="py-1">
+                          {notifications.map((notification) => (
+                            <button
+                              key={notification._id}
+                              onClick={() => handleNotificationClick(notification)}
+                              className={cn(
+                                "w-full text-left px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5",
+                                !notification.read && "bg-primary/5 font-semibold"
+                              )}
+                            >
+                              <div className="flex items-start gap-2">
+                                <div className={cn(
+                                  "mt-1 h-2 w-2 rounded-full flex-shrink-0",
+                                  !notification.read ? "bg-primary" : "bg-transparent"
+                                )} />
+                                <div className="flex-1 min-w-0">
+                                  <p className={cn("text-xs", !notification.read ? "font-semibold" : "text-muted")}>
+                                    {notification.message}
+                                  </p>
+                                  <p className="text-xs text-muted mt-1">
+                                    {new Date(notification.createdAt).toLocaleDateString(undefined, {
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </p>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {user ? (
                 <div className="relative profile-dropdown-container">
                   <button

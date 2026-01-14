@@ -87,8 +87,12 @@ pnpm start
 | `/login` | User login page (Firebase Auth + Demo login) | No |
 | `/signup` | User registration page | No |
 | `/items` | Browse all lost and found items with filters | No |
-| `/items/[id]` | View detailed item information with location map | No |
+| `/items/[id]` | View detailed item information with location map and matching lost items | No |
 | `/add-item` | Report a new lost or found item | Yes |
+| `/dashboard` | User dashboard with statistics and reported items | Yes |
+| `/dashboard/claims` | Finder dashboard to manage claims for found items | Yes |
+| `/profile` | User profile page with account information | Yes |
+| `/claims` | Claims management page (alternative route) | Yes |
 
 ### API Routes
 
@@ -97,7 +101,15 @@ pnpm start
 | `GET` | `/api/items` | Fetch all items (supports `?filter=lost` or `?filter=found`) | No |
 | `POST` | `/api/items` | Create a new item report | Yes |
 | `GET` | `/api/items/[id]` | Fetch a single item by ID | No |
+| `GET` | `/api/items/[id]/matches` | Get matching lost items for a found item | No |
 | `POST` | `/api/auth/demo` | Demo login endpoint | No |
+| `POST` | `/api/claims` | Create a new claim for a found item | Yes |
+| `GET` | `/api/claims` | Get claims for an item (finder only, requires `?itemId=...`) | Yes |
+| `PATCH` | `/api/claims/[id]` | Approve or reject a claim | Yes |
+| `GET` | `/api/notifications` | Fetch notifications for current user | Yes |
+| `PATCH` | `/api/notifications/[id]/read` | Mark notification as read | Yes |
+| `GET` | `/api/user/me` | Get current user information | Yes |
+| `GET` | `/api/user/items` | Get items reported by current user (requires `?email=...`) | Yes |
 
 ---
 
@@ -156,7 +168,41 @@ pnpm start
 - **Theme-Aware Components** - All components adapt to light/dark mode
 - **Custom CSS Variables** - Centralized color management in `globals.css`
 
-### 8. **Performance Optimizations**
+### 8. **Claim & Verification System**
+- **Claim Items** - Users can claim found items that might belong to them
+- **Claim Status Tracking** - Items show status: Available, Claim Pending, or Claimed
+- **Finder Dashboard** - Finders can view and manage all claims for their found items
+- **Approve/Reject Claims** - Finders can approve or reject claims with proper validation
+- **One Claim Per Item** - System ensures only one approved claim per found item
+- **Automatic Rejection** - When a claim is approved, all other pending claims are automatically rejected
+
+### 9. **In-App Notifications System**
+- **Real-Time Notifications** - Users receive notifications for claim-related activities
+- **Notification Types**:
+  - `claim_created` - Notifies finder when someone requests to claim their found item
+  - `claim_approved` - Notifies claimer when their claim is approved
+  - `claim_rejected` - Notifies claimer when their claim is rejected
+- **Notification Bell** - Navbar bell icon with unread count badge
+- **Notification Dropdown** - Click bell to view all notifications with read/unread status
+- **Auto-Refresh** - Notifications refresh every 30 seconds
+- **Click to Navigate** - Clicking a notification marks it as read and navigates to the item
+
+### 10. **Cross-Search Matching System**
+- **Smart Matching** - Found items automatically show matching lost items
+- **Keyword Matching** - Matches based on title and description keywords
+- **Location Matching** - Matches items with similar locations
+- **Category Matching** - Optional category-based matching
+- **Possible Owners Section** - Found item pages show people who reported losing similar items
+- **Quick Claim** - Users can claim found items directly from matching lost items
+- **Read-Only Suggestions** - Matching is informational only, no auto-claiming
+
+### 11. **User Dashboard & Profile**
+- **User Dashboard** - Statistics and overview of user's reported items
+- **Profile Page** - View and manage account information
+- **Reported Items** - View all items reported by the user
+- **Quick Actions** - Easy access to common tasks from dashboard
+
+### 12. **Performance Optimizations**
 - **Dynamic Imports** - Leaflet maps loaded client-side to prevent SSR issues
 - **Image Optimization** - Next.js Image component with remote pattern support
 - **Code Splitting** - Automatic route-based code splitting
@@ -188,6 +234,18 @@ Built mobile-first with Tailwind CSS, the application adapts seamlessly to all s
 ### Theme System
 The application supports both light and dark themes with automatic system preference detection. Users can manually toggle themes, and all components adapt their colors, backgrounds, and glass effects accordingly.
 
+### Claim & Verification System
+The application includes a complete claim pipeline for found items. Users can submit claims for found items they believe belong to them, providing proof messages. Finders (those who reported found items) can view all claims in their dashboard and approve or reject them. When a claim is approved, the item is marked as claimed and all other pending claims are automatically rejected. The system ensures only one approved claim per item.
+
+### In-App Notifications System
+A comprehensive notification system keeps users informed about claim-related activities. Notifications are created server-side when claims are created, approved, or rejected. The navbar includes a notification bell with an unread count badge. Users can click the bell to view all notifications in a dropdown, with unread notifications visually distinct. Clicking a notification marks it as read and navigates to the relevant item.
+
+### Cross-Search Matching System
+The application includes an intelligent matching system that helps connect found items with potential owners. When viewing a found item, the system automatically searches for matching lost items based on keywords from the title and description, location similarity, and optional category matching. The "Possible Owners" section shows people who reported losing similar items, making it easier for finders to identify potential owners and for owners to discover found items that might be theirs.
+
+### User Dashboard & Profile
+Authenticated users have access to a personal dashboard showing statistics about their reported items (total, lost, found, recent items). The dashboard also displays all items reported by the user. A separate profile page shows detailed account information including name, email, account creation date, and verification status.
+
 ---
 
 ## 📁 Project Structure
@@ -197,8 +255,15 @@ lost/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API routes
 │   │   ├── auth/          # Authentication endpoints
-│   │   └── items/         # Item CRUD endpoints
+│   │   ├── items/         # Item CRUD endpoints
+│   │   ├── claims/        # Claim management endpoints
+│   │   ├── notifications/ # Notification endpoints
+│   │   └── user/          # User-specific endpoints
 │   ├── items/             # Item pages
+│   ├── dashboard/         # Dashboard pages
+│   │   └── claims/        # Claims management page
+│   ├── profile/            # User profile page
+│   ├── claims/             # Claims page (alternative)
 │   ├── login/             # Login page
 │   ├── signup/            # Signup page
 │   ├── add-item/          # Report item page
@@ -209,6 +274,7 @@ lost/
 │   ├── ItemCard.tsx       # Item card component
 │   ├── CampusMap.tsx      # Campus location map
 │   ├── ItemLocationMap.tsx # Item location map
+│   ├── ClaimModal.tsx     # Claim submission modal
 │   ├── Loader.tsx         # Loading indicators
 │   └── Skeleton.tsx       # Skeleton loaders
 ├── lib/                   # Utility libraries
@@ -217,7 +283,7 @@ lost/
 │   ├── apiClient.ts       # API client utilities
 │   └── utils.ts           # General utilities
 ├── types/                 # TypeScript type definitions
-│   └── item.ts            # Item type
+│   └── item.ts            # Item, Claim, and Notification types
 └── public/                # Static assets
 ```
 

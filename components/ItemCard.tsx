@@ -31,14 +31,21 @@ export function ItemCard({ item }: { item: Item }) {
       </div>
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-lg font-semibold">{item.title}</h3>
-        <span
-          className={cn(
-            "badge",
-            item.status === "lost" ? "badge-lost" : "badge-found",
+        <div className="flex flex-col items-end gap-1">
+          <span
+            className={cn(
+              "badge",
+              item.status === "lost" ? "badge-lost" : "badge-found",
+            )}
+          >
+            {item.status === "lost" ? "Lost" : "Found"}
+          </span>
+          {item.status === "found" && item.claimed && (
+            <span className="badge bg-blue-100 text-blue-700 text-xs dark:bg-blue-900/30 dark:text-blue-300">
+              Claimed
+            </span>
           )}
-        >
-          {item.status === "lost" ? "Lost" : "Found"}
-        </span>
+        </div>
       </div>
       <p className="text-sm text-muted line-clamp-2">
         {item.description || "No description provided."}

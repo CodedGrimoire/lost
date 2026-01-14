@@ -39,6 +39,8 @@ export default function AddItemPage() {
     try {
       const payload = {
         ...form,
+        reportedBy: user.uid, // Firebase UID
+        claimed: false, // Default to not claimed
         reporter: {
           name: user.displayName || user.email?.split("@")[0] || "User",
           email: user.email || "",

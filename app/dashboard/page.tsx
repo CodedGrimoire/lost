@@ -101,13 +101,20 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <p className="text-muted mt-1">Welcome back, {displayName}!</p>
           </div>
-          <Link
-            href="/profile"
-            className="flex items-center gap-2 rounded-lg border border-base bg-surface px-4 py-2 text-sm font-semibold transition hover:border-primary hover:shadow-md"
-          >
-            <HiUser />
-            <span>View Profile</span>
-          </Link>
+          <div className="flex gap-2">
+            <Link
+              href="/dashboard/claims"
+              className="flex items-center gap-2 rounded-lg border border-base bg-surface px-4 py-2 text-sm font-semibold transition hover:border-primary hover:shadow-md"
+            >
+              <HiSearch /> Manage Claims
+            </Link>
+            <Link
+              href="/profile"
+              className="flex items-center gap-2 rounded-lg border border-base bg-surface px-4 py-2 text-sm font-semibold transition hover:border-primary hover:shadow-md"
+            >
+              <HiUser /> View Profile
+            </Link>
+          </div>
         </div>
       </div>
 
