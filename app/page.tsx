@@ -99,7 +99,7 @@ export default function Home() {
         <div className="relative">
           <div className="absolute inset-0 -z-10 rounded-3xl bg-primary opacity-10 blur-3xl" />
           <Image
-            src="/hero.png"
+            src="/hero.jpg"
             alt="CampusLost+Found hero"
             width={600}
             height={500}
@@ -112,22 +112,39 @@ export default function Home() {
       <section className="section-shell">
         <div>
           <h2 className="section-title">How it works</h2>
-          <p className="section-subtitle">Three simple steps to reunite items with their owners.</p>
+          <p className="section-subtitle">A simple, secure process to help reunite lost items with their owners.</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {[
-            { title: "Browse", description: "Check recent lost and found items posted by the community." },
-            { title: "Login", description: "Sign in to track updates and reach out to reporters securely." },
-            { title: "Report", description: "Report a lost or found item with location and images." },
-          ].map((step, idx) => (
-            <div key={step.title} className="card">
-              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white font-semibold">
-                {idx + 1}
+            { 
+              title: "1. Report or Browse", 
+              description: "If you found an item, report it with details, location, and photos. If you lost something, browse through found items posted by others. Use filters and search to find what you're looking for quickly.",
+              icon: HiSearch
+            },
+            { 
+              title: "2. Claim & Verify", 
+              description: "Found your item? Submit a claim with proof of ownership. The finder will review your claim and verify it matches. Once approved, you'll receive a meetup address to collect your item.",
+              icon: HiCheckCircle
+            },
+            { 
+              title: "3. Reunite & Confirm", 
+              description: "Meet at the provided location to collect your item. After receiving it, mark it as received to complete the process. The item will be removed from listings after one week.",
+              icon: HiHeart
+            },
+          ].map((step, idx) => {
+            const IconComponent = step.icon;
+            return (
+              <div key={step.title} className="card">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white">
+                    <IconComponent className="text-xl" />
+                  </div>
+                  <h3 className="text-xl font-semibold">{step.title}</h3>
+                </div>
+                <p className="text-sm text-muted leading-relaxed">{step.description}</p>
               </div>
-              <h3 className="text-xl font-semibold">{step.title}</h3>
-              <p className="text-sm text-muted">{step.description}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
