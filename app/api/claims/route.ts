@@ -4,17 +4,52 @@ import { getAuthTokenFromRequest } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
-// Helper to get user UID from token (simplified - in production, verify Firebase token)
+// Helper to get user UID from token
 async function getUserIdFromToken(token: string): Promise<string | null> {
-  // For now, we'll extract from token or use a simple approach
-  // In production, verify the Firebase token using Firebase Admin SDK
-  // For demo purposes, we'll use the token as a user identifier
+  // For demo tokens
   if (token.startsWith("demo_")) {
-    // Demo token - extract user info
     return token;
   }
-  // In production, decode and verify Firebase ID token
-  return token;
+  
+  // Firebase ID tokens are JWTs - decode to get UID
+  try {
+    // JWT format: header.payload.signature
+    // The payload contains the user_id in the 'sub' or 'user_id' field
+    const parts = token.split(".");
+    if (parts.length === 3) {
+      // Decode the payload (base64url)
+      const payload = JSON.parse(
+        Buffer.from(parts[1].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString()
+      );
+      // Firebase uses 'user_id' or 'sub' for the UID
+      return payload.user_id || payload.sub || null;
+    }
+  } catch (error) {
+    console.error("Error decoding token:", error);
+  }
+  
+  return null;
+}
+
+// Helper to get user email from token
+async function getUserEmailFromToken(token: string): Promise<string | null> {
+  if (token.startsWith("demo_")) {
+    return null;
+  }
+  
+  try {
+    const parts = token.split(".");
+    if (parts.length === 3) {
+      const payload = JSON.parse(
+        Buffer.from(parts[1].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString()
+      );
+      return payload.email || null;
+    }
+  } catch (error) {
+    console.error("Error decoding token for email:", error);
+  }
+  
+  return null;
 }
 
 // POST /api/claims - Create a new claim
@@ -38,20 +73,30 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { itemId, message } = body;
+    // Support both new format (itemId, claimerId, proof) and old format (itemId, message)
+    const { itemId, claimerId, proof, message } = body;
 
-    if (!itemId || !message) {
+    // Use claimerId from body if provided, otherwise use userId from token
+    const finalClaimerId = claimerId || userId;
+    // Use proof if provided, otherwise use message (for backward compatibility)
+    const finalProof = proof || message;
+
+    if (!itemId || !finalProof) {
       return NextResponse.json(
-        { error: "itemId and message are required" },
+        { error: "itemId and proof (or message) are required" },
         { status: 400 }
       );
     }
 
     const client = await clientPromise;
     const db = client.db();
+    const { ObjectId } = await import("mongodb");
+
+    // Convert itemId to ObjectId if it's a string
+    const itemIdObj = typeof itemId === "string" ? new ObjectId(itemId) : itemId;
 
     // Verify item exists and is a found item
-    const item = await db.collection("items").findOne({ _id: itemId as any });
+    const item = await db.collection("items").findOne({ _id: itemIdObj });
     
     if (!item) {
       return NextResponse.json(
@@ -76,8 +121,8 @@ export async function POST(request: NextRequest) {
 
     // Check if user already has a pending claim for this item
     const existingClaim = await db.collection("claims").findOne({
-      itemId: itemId,
-      claimedBy: userId,
+      itemId: itemIdObj,
+      claimedBy: finalClaimerId,
       status: "pending",
     });
 
@@ -91,22 +136,22 @@ export async function POST(request: NextRequest) {
     // Create the claim
     const now = new Date();
     const claim = {
-      itemId: itemId,
+      itemId: itemIdObj,
       itemTitle: item.title,
-      claimedBy: userId,
-      message: message,
+      claimedBy: finalClaimerId,
+      message: finalProof, // Store proof as message in the database
       status: "pending" as const,
       createdAt: now,
     };
 
-    const result = await db.collection("claims").insertOne(claim);
+    await db.collection("claims").insertOne(claim);
 
     // Create notification for the finder
     if (item.reportedBy) {
       const notification = {
         userId: item.reportedBy,
         type: "claim_created" as const,
-        itemId: typeof itemId === "string" ? itemId : itemId.toString(),
+        itemId: typeof itemId === "string" ? itemId : itemIdObj.toString(),
         itemTitle: item.title,
         message: "Someone has requested to claim your found item",
         read: false,
@@ -116,10 +161,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      {
-        id: result.insertedId.toString(),
-        claim: { ...claim, _id: result.insertedId.toString() },
-      },
+      { success: true },
       { status: 201 }
     );
   } catch (error) {
@@ -163,9 +205,13 @@ export async function GET(request: NextRequest) {
 
     const client = await clientPromise;
     const db = client.db();
+    const { ObjectId } = await import("mongodb");
+
+    // Convert itemId to ObjectId if it's a string
+    const itemIdObj = typeof itemId === "string" ? new ObjectId(itemId) : itemId;
 
     // Verify the user is the finder (reporter) of this item
-    const item = await db.collection("items").findOne({ _id: itemId as any });
+    const item = await db.collection("items").findOne({ _id: itemIdObj });
     
     if (!item) {
       return NextResponse.json(
@@ -175,12 +221,19 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is the reporter
-    // For now, we'll check reporter.email or reportedBy
-    // In production, verify Firebase UID properly
-    const isReporter = item.reportedBy === userId || 
-                      (item.reporter?.email && token.includes(item.reporter.email));
+    // Match by Firebase UID (reportedBy) or by email
+    const userEmail = await getUserEmailFromToken(token);
+    const isReporter = 
+      (item.reportedBy && userId && item.reportedBy === userId) ||
+      (item.reporter?.email && userEmail && item.reporter.email === userEmail);
 
     if (!isReporter) {
+      console.log("Authorization failed:", {
+        itemReportedBy: item.reportedBy,
+        userId,
+        itemReporterEmail: item.reporter?.email,
+        userEmail,
+      });
       return NextResponse.json(
         { error: "Only the item finder can view claims" },
         { status: 403 }
@@ -189,7 +242,7 @@ export async function GET(request: NextRequest) {
 
     // Get all claims for this item
     const claims = await db.collection("claims")
-      .find({ itemId: itemId })
+      .find({ itemId: itemIdObj })
       .sort({ createdAt: -1 })
       .toArray();
 
