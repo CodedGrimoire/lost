@@ -15,7 +15,7 @@ async function getUserIdFromToken(token: string): Promise<string | null> {
 // PATCH /api/notifications/:id/read - Mark notification as read
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const token = getAuthTokenFromRequest(request);
@@ -35,7 +35,7 @@ export async function PATCH(
       );
     }
 
-    const notificationId = params.id;
+    const { id: notificationId } = await params;
     const client = await clientPromise;
     const db = client.db();
 

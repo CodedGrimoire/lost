@@ -15,7 +15,7 @@ async function getUserIdFromToken(token: string): Promise<string | null> {
 // PATCH /api/claims/:id - Approve or reject a claim
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const token = getAuthTokenFromRequest(request);
@@ -35,7 +35,7 @@ export async function PATCH(
       );
     }
 
-    const claimId = params.id;
+    const { id: claimId } = await params;
     const body = await request.json();
     const { status } = body;
 

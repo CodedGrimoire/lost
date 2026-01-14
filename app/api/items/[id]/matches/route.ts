@@ -6,10 +6,10 @@ export const runtime = "nodejs";
 // GET /api/items/:id/matches - Get matching lost items for a found item
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const itemId = params.id;
+    const { id: itemId } = await params;
     const client = await clientPromise;
     const db = client.db();
 
